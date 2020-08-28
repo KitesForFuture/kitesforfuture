@@ -81,11 +81,19 @@ void app_main(void){
 		update();
 		
 		// trim for balancing is between -0.3 and 0.3 (measured in radians with assumption sin(x)=x near 0)
-		setZAxisTrim(1.0*((float)receivedSignal[1])/(3003.0));
-		setAUXTrim(1.0*((float)receivedSignal[2])/(3003.0));
-		setElevatorTrim(1.0*((float)receivedSignal[4])/(3003.0));
+		setZAxisTrim(0.);
+		setAUXTrim(0.);
+		setElevatorTrim(0.);
+
+		// set control gains from input signal
+		Py = pow(10., 2.*((float)receivedSignal[0])/(3003.0));
+		Dy = pow(10., 2.*((float)receivedSignal[1])/(3003.0));
+		Dz = pow(10., 2.*((float)receivedSignal[2])/(3003.0));
+		Pz = pow(10., 2.*((float)receivedSignal[3])/(3003.0));
+
+
 		
-		if((float)receivedSignal[3] > 750){ // third knob from the right turns on manual kite fly mode, which ignores orientation
+		if((float)receivedSignal[5] > -100){ // third knob from the right turns on manual kite fly mode, which ignores orientation
 			flightMode = GLIDE_MODE;
 		}else{
 			flightMode = HOVER_MODE;
@@ -94,8 +102,8 @@ void app_main(void){
 		// START HOVER LAND AT 10% battery or signal loss
 		
 		if(landing == false){
-			setGoalHeight(60.0*((float)receivedSignal[5])/(3003.0));
-			setYAxisTrim(3.5*((float)receivedSignal[0])/(3003.0));
+			setGoalHeight(10.0*((float)receivedSignal[5])/(3003.0));
+			setYAxisTrim(0.);
 			
 			//if(queryTimer(t) > 35){
 			

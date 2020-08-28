@@ -32,6 +32,13 @@ float z_axis_trim = 0;
 float aux_trim = 0;
 float elev_trim = 0;
 
+float Py = 0;
+float Dy = 0;
+float Iy = 1;
+float Pz = 0;
+float Dz = 0;
+float Iz = 1;
+
 // PINS for I2C:
 // (JLCPCB v1 board)
 // mpu6050

@@ -22,22 +22,20 @@ args = parser.parse_args()
 print(args)
 
 # open top of file to get the number of variables
-def get_nvar():
-	with open(args.fname, 'r') as f:
-	    q = deque(f, 1)  # replace 2 with n (lines read at the end)
+# def get_nvar():
+# 	with open(args.fname, 'r') as f:
+# 	    q = deque(f, 1)  # replace 2 with n (lines read at the end)
 
-	df =  pd.read_csv(StringIO(''.join(q)), header=None)
-	return len(df.columns)
+# 	df =  pd.read_csv(StringIO(''.join(q)), header=None)
+# 	return len(df.columns)
 
 
-
-ncols = get_nvar()
-variables = ["var " + str(i) for i in range(ncols)]
 
 if not args.vars is None:
-	assert len(args.vars) <= ncols
-	for i, v in enumerate(args.vars):
-		variables[i] = v
+	variables = [str(v) for v in args.vars]
+else:
+	# maximum number of variables is 10
+	variables = ["var " + str(i) for i in range(10)]
 
 
 fig, ax = plt.subplots() 
@@ -52,10 +50,11 @@ def animate(i):
 	with open(args.fname, 'r') as f:
 	    q = deque(f, args.nrows)  # replace 2 with n (lines read at the end)
 
-	df =  pd.read_csv(StringIO(''.join(q)), header=None, names=variables)
+	df =  pd.read_csv(StringIO(''.join(q)), header=None, usecols=range(len(variables)), names=variables)
 
 	plt.cla()
 	df.plot(ax=ax, ls="-", marker="o", ms=2, lw=1)
+	plt.legend(loc='lower left')
 	plt.xlabel('time')
 	plt.title(i)
 	plt.gcf().autofmt_xdate()

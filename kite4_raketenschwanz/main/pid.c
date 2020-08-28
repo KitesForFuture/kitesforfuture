@@ -9,6 +9,7 @@ float lastHeight = 0;
 float P_h; // for smoothing
 float smooth_C_h = 0;
 float I_y = 0;
+float I_z = 0;
 
 float goalHeight = -5;
 float targetHeight = -1;
@@ -111,7 +112,8 @@ void calculatePID(){
 	//---------------------------------------------------------------
 	
 	// PID CONTROLLER FOR KEEPING THE Y-AXIS LEVEL (Z-AXIS CONTROLLER)
-	// rot is the rotation matrix of the drone in space. last column (z-axis) and z-values of the rotated x and y axes are accurate to 0.03 degrees, other values drift by 1 degree per minute. rot is an array of dimension 9, rot[6] is 3rd (2nd) row, 1st (0th) column.
+	// rot is the rotation matrix of the drone in space. last column (z-axis) and 
+	// z-values of the rotated x and y axes are accurate to 0.03 degrees, other values drift by 1 degree per minute. rot is an array of dimension 9, rot[6] is 3rd (2nd) row, 1st (0th) column.
 	
 	// calculate angle around z-axis
 	// vector a is where the y-axis should be
@@ -136,6 +138,16 @@ void calculatePID(){
 	// D_z is in degree per second
 	// D_z STAYS ACTIVE EVEN WHEN KITE IS HORIZONTAL
 	float D_z = gyroz - avgGyroz;
+
+	// I_z
+	#define MAX_I_Z 30
+	if(flightMode == HOVER_MODE){
+		if(P_z > 0){
+			if(I_z < MAX_I_Z) I_z += 7.0*time_difference;
+		}else{
+			if(I_z > -MAX_I_Z) I_z -= 7.0*time_difference;
+		}
+	}
 	
 	//---------------------------------------------------------------
 	//---------------------------------------------------------------
@@ -171,10 +183,10 @@ void calculatePID(){
 	
 	float P_y = factor*(37/*pcb glued in with slight forward pitch*/+200 * (angleDifference + y_axis_trim));
 	float D_y = gyroy-avgGyroy;
-	float C_y = -0.12*D_y + 0.6*P_y + I_y;
+	float C_y = -0.12*Dy*D_y + 0.6*Py*P_y + Iy*I_y;
 	// transition to aerodynamically guided pitch
 	if(flightMode == GLIDE_MODE){
-		C_y = -0.5*D_y - 17 + 50*elev_trim;
+		C_y = -0.5*Dy*D_y - 17 + 50*elev_trim;
 	}
 	
 	// I_y
@@ -210,9 +222,9 @@ void calculatePID(){
 	
 	// GRADUALLY INCREASE YAW CONTROL (STEERING, Z-AXIS) BY RUDDER
 	// GRADUALLY DECREASE Z-AXIS-CONTROL
-	float C_z = -0.3*D_z + (1.0-angleDifference)*0.6*P_z - 15*angleDifference*aux_trim;
+	float C_z = -0.3*Dz*D_z + (1.0-angleDifference)*0.6*Pz*P_z + Iz*I_z - 15*angleDifference*aux_trim;
 	if(flightMode == GLIDE_MODE || flightMode == MOTORPLANE_MODE){ // third knob from the right turns on manual kite fly mode, which ignores orientation
-		C_z = -0.1*D_z + 50*aux_trim; // TODO: find right stiffness for D_z by testing
+		C_z = -0.1*Dz*D_z + 50*aux_trim; // TODO: find right stiffness for D_z by testing
 	}
 	
 	// (GRADUALLY) ...
@@ -248,6 +260,6 @@ void calculatePID(){
 	
 	// SENDING DEBUGGING DATA TO GROUND
 	
-	sendData(flightMode, servoElevon, C_y, P_y, D_y, I_y, save_y_axis_trim, angleDifference, factor, 0.0);
+	sendData(Py, Dy, Pz, Dz, flightMode, 0, 0, 0, 0, 0);
 	
 }
