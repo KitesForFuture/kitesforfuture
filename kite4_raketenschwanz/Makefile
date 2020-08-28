@@ -3,7 +3,7 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := hello-world
+PROJECT_NAME := mcpwm_servo_control
 
 include $(IDF_PATH)/make/project.mk
 

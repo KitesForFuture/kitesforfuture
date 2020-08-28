@@ -294,11 +294,9 @@ void initMPU6050(){
 	mpu_pos_avg.accel_y -= accel_offset_y;
 	mpu_pos_avg.accel_z *= 0.01;
 	mpu_pos_avg.accel_z -= accel_offset_z;
-	/*
-	mpu_pos_avg.accel_x = 9.8;
-	mpu_pos_avg.accel_y = 0;
-	mpu_pos_avg.accel_z = 0;
-	*/
+	
+	
+	
 	acc_x_smooth = mpu_pos.accel_x-accel_offset_x;
 	acc_y_smooth = mpu_pos.accel_y-accel_offset_y;
 	acc_z_smooth = mpu_pos.accel_z-accel_offset_z;
@@ -314,4 +312,9 @@ void initMPU6050(){
 	mpu_pos_avg.accel_x /= mpu_pos_avg.accel_norm;
 	mpu_pos_avg.accel_y /= mpu_pos_avg.accel_norm;
 	mpu_pos_avg.accel_z /= mpu_pos_avg.accel_norm;
+	
+	//OVERRIDE EVERYTHING ABOVE TO MAKE Y-AXIS POINT TOWARDS CENTRE OF THE EARTH
+	mpu_pos_avg.accel_x = 0;
+	mpu_pos_avg.accel_y = 1;
+	mpu_pos_avg.accel_z = 0;
 }

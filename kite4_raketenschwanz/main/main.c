@@ -36,7 +36,7 @@
 #include "batteryPercentage.c"
 #include "pid.c"
 
-int counter = 0;
+//int counter = 0;
 
 void init(){
 	initUptime();
@@ -45,10 +45,10 @@ void init(){
 	network_setup();
 	initMotors();
 	
-	setAngle(1, 0);  //y+
-	setSpeed(0, 0);  //y+
-	setSpeed(3, 0);  //y-
-	setAngle(2, 0);  //y-
+	setAngle(TOP_RIGHT, 0);
+	setSpeed(BOTTOM_LEFT, 0);
+	setSpeed(BOTTOM_RIGHT, 0);
+	setAngle(TOP_LEFT, 0);
 	
 	initMPU6050();
 	initHeightSensorFusion();
@@ -57,17 +57,6 @@ void init(){
 }
 
 void update(){
-	
-	if(counter > 20){
-		counter = 0;
-		printf("\nrot= %f\t%f\t%f\t\n     %f\t%f\t%f\t\n     %f\t%f\t%f\n", rot[0], rot[1], rot[2], rot[3], rot[4], rot[5], rot[6], rot[7], rot[8]);
-		printf("accel_x = %f.\n", mpu_pos.accel_x-accel_offset_x);
-		printf("accel_y = %f.\n", mpu_pos.accel_y-accel_offset_y);
-		printf("accel_z = %f.\n", mpu_pos.accel_z-accel_offset_z);
-		printf("wind: (%f, %f)\n", windY, windZ);
-		printf("lineLength: %f, height = %f, kiteSpeed = %f\n", lineLength, getHeight(), kiteSpeed);
-	}counter++;	
-	
 	readMPURawData();
 	processMPURawData();
 	fuseHeightSensorData();
@@ -94,16 +83,23 @@ void app_main(void){
 		// trim for balancing is between -0.3 and 0.3 (measured in radians with assumption sin(x)=x near 0)
 		setZAxisTrim(1.0*((float)receivedSignal[1])/(3003.0));
 		setAUXTrim(1.0*((float)receivedSignal[2])/(3003.0));
+		setElevatorTrim(1.0*((float)receivedSignal[4])/(3003.0));
 		
-		// START LANDING AT 35 seconds
+		if((float)receivedSignal[3] > 750){ // third knob from the right turns on manual kite fly mode, which ignores orientation
+			flightMode = GLIDE_MODE;
+		}else{
+			flightMode = HOVER_MODE;
+		}
+		
+		// START HOVER LAND AT 10% battery or signal loss
 		
 		if(landing == false){
-			setGoalHeight(15.0*((float)receivedSignal[5])/(3003.0));
-			setYAxisTrim(2.5*((float)receivedSignal[0])/(3003.0));
+			setGoalHeight(60.0*((float)receivedSignal[5])/(3003.0));
+			setYAxisTrim(3.5*((float)receivedSignal[0])/(3003.0));
 			
 			//if(queryTimer(t) > 35){
 			
-			if(timeSinceLastReceiveInSeconds() > 3.0 || (getBatteryPercentage() < 0.25 && getUptime() > 10)){
+			if(timeSinceLastReceiveInSeconds() > 3.0 || (getBatteryPercentage() < 0.10 && getUptime() > 10)){
 				setGoalHeight(-5);
 				setYAxisTrim(0.0);
 				landing = true;
@@ -113,6 +109,25 @@ void app_main(void){
 		
 		calculatePID();
 	    
+	    
+	    
+	    
+	    /*
+	    if(counter == 10){
+	    	//printf("angle = %f.\n", angle);
+	    	
+			printf("accel_x = %f, %f.\n", mpu_pos_avg.accel_x, mpu_pos.accel_x);
+			printf("accel_y = %f, %f.\n", mpu_pos_avg.accel_y, mpu_pos.accel_y);
+			printf("accel_z = %f, %f.\n", mpu_pos_avg.accel_z, mpu_pos.accel_z);
+			printf("gyro_x = %f.\n", mpu_pos.gyro_x-mpu_pos_avg.gyro_x);
+			printf("gyro_y = %f.\n", mpu_pos.gyro_y-mpu_pos_avg.gyro_y);
+			printf("gyro_z = %f.\n", mpu_pos.gyro_z-mpu_pos_avg.gyro_z);
+			printf("rot= %f\t%f\t%f\t\n     %f\t%f\t%f\t\n     %f\t%f\t%f\t", rot[0], rot[1], rot[2], rot[3], rot[4], rot[5], rot[6], rot[7], rot[8]);
+			
+			printf("free memory = %d.\n", xPortGetFreeHeapSize());
+	    	counter = 0;
+	    }counter++;
+	    */
 	    vTaskDelay(1.0);
 	    
     }
