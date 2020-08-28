@@ -260,6 +260,6 @@ void calculatePID(){
 	
 	// SENDING DEBUGGING DATA TO GROUND
 	
-	sendData(Py, Dy, Pz, Dz, flightMode, 0, 0, 0, 0, 0);
+	sendData(P_y, D_y, I_y/30., P_z, D_z, I_z/30., flightMode, servoRudder/30., 0, 0);
 	
 }

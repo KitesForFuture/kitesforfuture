@@ -54,7 +54,7 @@ def animate(i):
 
 	plt.cla()
 	df.plot(ax=ax, ls="-", marker="o", ms=2, lw=1)
-	plt.legend(loc='lower left')
+	plt.legend(loc="lower left")
 	plt.xlabel('time')
 	plt.title(i)
 	plt.gcf().autofmt_xdate()

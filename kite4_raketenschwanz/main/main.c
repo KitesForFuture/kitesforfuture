@@ -102,7 +102,7 @@ void app_main(void){
 		// START HOVER LAND AT 10% battery or signal loss
 		
 		if(landing == false){
-			setGoalHeight(10.0*((float)receivedSignal[5])/(3003.0));
+			setGoalHeight(-5.0 - 10.0*((float)receivedSignal[5])/(3003.0));
 			setYAxisTrim(0.);
 			
 			//if(queryTimer(t) > 35){
