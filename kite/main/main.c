@@ -47,6 +47,11 @@
 #include "batteryPercentage.c"
 
 // rudder, elevator and motor speed control
+#include "control_glide_elevator.c"
+#include "control_glide_rudder.c"
+#include "control_hover_elevator.c"
+#include "control_hover_rudder.c"
+#include "control_hover_height.c"
 #include "pid.c"
 
 //int counter = 0;

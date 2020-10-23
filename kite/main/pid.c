@@ -4,12 +4,6 @@
 
 int flightMode = GLIDE_MODE;
 
-void setGoalHeight(float goalheight)
-{
-	goalHeight = goalheight;
-	//targetHeight = getHeight();
-}
-
 void setRateOfClimb(float rate)
 {
 	rateOfClimb = fabs(rate);
@@ -76,6 +70,7 @@ float limitElevonAngle(float elevon)
 	return elevon;
 }
 
+float smooth_C_h = 0;
 void calculatePID()
 {
 	// PID CONTROLLER FOR THE HEIGHT
@@ -86,21 +81,22 @@ void calculatePID()
 
 	// TODO: MOVE THIS TO THE OTHER FILE
 
-	// (GRADUALLY) ...
-	C_h = C_h * (1.0 - angleDifference) + angleDifference * MOTOR_SPEED_WHEN_HORIZONTAL;
+	// // (GRADUALLY) ...
+	// C_h = C_h * (1.0 - angleDifference) + angleDifference * MOTOR_SPEED_WHEN_HORIZONTAL;
 
-	// ... STOP CONTROLLING THE HEIGHT using the motors when angle to horizon is 0 or negative
-	if (angleDifference == 1.0)
-	{
-		C_h = 0.0;
-	}
+	// // ... STOP CONTROLLING THE HEIGHT using the motors when angle to horizon is 0 or negative
+	// if (angleDifference == 1.0)
+	// {
+	// 	C_h = 0.0;
+	// }
 
-	if (C_h > (MOTOR_MAX_SPEED - 10) * (1 - angleDifference))
-		C_h = (MOTOR_MAX_SPEED - 10) * (1 - angleDifference) + MOTOR_SPEED_WHEN_HORIZONTAL * angleDifference; // VERY IMPORTANT to keep C_z effective
-	if (C_h < 0)
-		C_h = 0;
-	smooth_C_h = smooth_C_h * 0.9 + C_h * 0.1;
-	float motor = limitMotorForSafety(smooth_C_h);
+	// if (C_h > (MOTOR_MAX_SPEED - 10) * (1 - angleDifference))
+	// 	C_h = (MOTOR_MAX_SPEED - 10) * (1 - angleDifference) + MOTOR_SPEED_WHEN_HORIZONTAL * angleDifference; // VERY IMPORTANT to keep C_z effective
+	// if (C_h < 0)
+	// 	C_h = 0;
+	// smooth_C_h = smooth_C_h * 0.9 + C_h * 0.1;
+	// float motor = limitMotorForSafety(smooth_C_h);
+	float motor = limitMotorForSafety(C_h);
 
 	//---------------------------------------------------------------
 	//---------------------------------------------------------------

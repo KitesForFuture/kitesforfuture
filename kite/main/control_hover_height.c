@@ -10,6 +10,7 @@ void setGoalHeight(float goalheight)
 	//targetHeight = getHeight();
 }
 
+float P_h = 0.; 
 float control_hover_height(float P, float I, float D, float C)
 {
     float current_height = getHeight();

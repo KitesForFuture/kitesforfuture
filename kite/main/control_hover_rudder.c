@@ -49,5 +49,5 @@ float control_hover_rudder(float P, float I, float D, float C)
 		angleDifference = 0.0;
 	}
 
-    return -0.3 * D * D_z + 0.6 * (1.0 - angleDifference) * P * P_z + angleDifference * C
+    return -0.3 * D * D_z + 0.6 * (1.0 - angleDifference) * P * P_z + angleDifference * C;
 }
