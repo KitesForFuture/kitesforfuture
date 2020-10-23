@@ -15,12 +15,7 @@ void app_main(void)
 	setRole(DATA_RECEIVER);
 	network_setup();
 	
-	
 	while(1){
-		
-		
-		
 	    vTaskDelay(10.0);
-	    
     }
 }

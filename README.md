@@ -1,7 +1,8 @@
 # kitesforfuture
+
 Kites for Future revolutionises the way we produce electricity
 
-# Setup
+## Setup
 
 Follow the instructions [here](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/#get-started-connect) to set up the ESP IDF.
 
@@ -25,3 +26,11 @@ Flash the compiled code with
 ```
 
 where `PORT` is the serial port configured above.
+
+Then, you can monitor the data receiver via
+
+```bash
+    idf.py -p PORT monitor
+    # or directly run
+    idf.py -p PORT flash monitor
+```
