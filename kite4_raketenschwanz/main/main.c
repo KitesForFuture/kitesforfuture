@@ -28,7 +28,7 @@
 #include "mpu6050.c"
 #include "bmp280.c"
 #include "heightSensorFusion.c"
-#include "../../COMMON_FILES/RC2.c"
+#include "../../COMMON_FILES/RC.c"
 #include "windDirection.c"
 #include "lineLength.c"
 #include "sidewaysAngle.c"

@@ -57,6 +57,7 @@ float timeSinceLastReceiveInSeconds(){
 	return 0.000001*(float)(currentTime - lastReceivedtime);
 }
 
+// gets called when incoming data is received
 static void msg_recv_cb(const uint8_t *mac_addr, const uint8_t *data, int len)
 {
 	if(ROLE == KITE){
@@ -73,9 +74,12 @@ static void msg_recv_cb(const uint8_t *mac_addr, const uint8_t *data, int len)
 				
 				// HERE YOU CAN DEFINE THE BEHAVIOUR ON RECEIVING DATA:
 				
-				// IF the sender tells you that it just turned on ...
+				// IF the sender/radio control tells you that it just turned on ...
+				// the first message sends "1000000" so that we can detect whether the rc has been turned on before the kite
+				// can re-init radio control mid flight to reset signalOffset
+				// TODO: maybe use first received signal to set signalOffset instead of sending "1000000"
 				if(msg.control[0] >= 1000000){
-					signalOffset[0] = (int)msg.control[0]-1000000;
+					signalOffset[0] = (int)(msg.control[0]-1000000);
 					for(int i = 1; i < 6; i++){
 						signalOffset[i] = (int)msg.control[i];
 					}
@@ -111,7 +115,9 @@ static void msg_recv_cb(const uint8_t *mac_addr, const uint8_t *data, int len)
 	}
 	
 }
-static void network_setup(void)
+
+// init wifi on the esp
+void network_setup(void)
 {
 	
 	// Initialize FS NVS
@@ -163,7 +169,8 @@ static void network_setup(void)
 	}
 }
 
-static void sendControl(uint32_t poti[6]){
+// used by the radio control to send control signals to the kite
+void sendControl(uint32_t poti[6]){
 	esp_now_msg_t msg;
 	msg.mode = RC_MODE;
 	if(firstTime == 1){
@@ -188,7 +195,8 @@ static void sendControl(uint32_t poti[6]){
 	esp_now_send(broadcast_mac, msg_data, packet_size);
 }
 
-static void sendData(float data[DATALENGTH]){
+// used by the kite to send data to the data receiver
+void sendDataArray(float data[DATALENGTH]){
 
 	esp_now_msg_t msg;
 	
@@ -207,6 +215,38 @@ static void sendData(float data[DATALENGTH]){
 	
 	// Send
 	esp_now_send(broadcast_mac, msg_data, packet_size);
+}
+
+int numberOfOmittedSends = 0;
+int counterForOmittedSends = 0;
+
+void setNumberOfOmittedSends(int n){
+	numberOfOmittedSends = n;
+}
+
+void sendData(float data0, float data1, float data2, float data3, float data4, float data5, float data6, float data7, float data8, float data9){
+	
+	if(counterForOmittedSends < numberOfOmittedSends){
+		counterForOmittedSends ++;
+		return;
+	}
+	counterForOmittedSends = 0;
+	
+	float to_be_sent[DATALENGTH];
+	for(int i = 0; i < DATALENGTH; i++){
+		to_be_sent[i] = 0;
+	}
+	to_be_sent[0] = data0;
+	to_be_sent[1] = data1;
+	to_be_sent[2] = data2;
+	to_be_sent[3] = data3;
+	to_be_sent[4] = data4;
+	to_be_sent[5] = data5;
+	to_be_sent[6] = data6;
+	to_be_sent[7] = data7;
+	to_be_sent[8] = data8;
+	to_be_sent[9] = data9;
+	sendDataArray(to_be_sent);
 }
 
 
