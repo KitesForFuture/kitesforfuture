@@ -1,6 +1,7 @@
 
 static esp_adc_cal_characteristics_t *adc_chars;
 
+// ADC (ANALOG 2 DIGITAL CONVERTER)
 void initADC(){
 	//Configure ADC (ANALOG 2 DIGITAL CONVERTER)
 	adc1_config_width(ADC_WIDTH_BIT_12);
@@ -40,7 +41,7 @@ uint32_t getSensor(int no){
 		case 5: cha = (adc1_channel_t)ADC_CHANNEL_6; break;
 		default: cha = (adc1_channel_t)ADC_CHANNEL_0; break;
 	}
-	//read ANALOG 2 DIGITAL pin (here a potentiometer), output between 1700 and 4095 (looks like 2^12)
+	//read ANALOG 2 DIGITAL pin (e.g. a potentiometer), output between 1700 and 4095 (looks like 2^12)
 	adc_reading = adc1_get_raw(cha);
 	//printf("raw a2d reading is %d", adc_reading);
 	uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars);

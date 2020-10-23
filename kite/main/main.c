@@ -1,6 +1,3 @@
-/* servo motor control example
-*/
-
 #include <math.h>
 #include <string.h>
 
@@ -17,23 +14,39 @@
 #include "driver/gpio.h"
 #include "driver/i2c.h"
 
+// some helper functions for mathematical operations
 #include "mymath.c"
 
 #include "timer.c"
 #include "constants.c"
-#include "sensors.c"
-#include "motors.c"
 
+// read data from analog sensors, e.g. battery state
+#include "analog_sensors.c"
+// servo motors and propeller motor control
+#include "motors.c"
+// i2c protocol for communication with mpu6050 and bmp280
 #include "interchip.c"
+// gyroscope and accelerometer
 #include "mpu6050.c"
+// barometer
 #include "bmp280.c"
+// estimate current height from pressure and acceleration
 #include "heightSensorFusion.c"
+
 #include "../../COMMON_FILES/RC.c"
+
+// determine wind direction
 #include "windDirection.c"
+// determine distance from ground station
 #include "lineLength.c"
+// angle towards wind direction in the plane parallel to ground
 #include "sidewaysAngle.c"
+// determine the kite's speed
 #include "kiteSpeed.c"
+// read battery state of charge from analog sensor
 #include "batteryPercentage.c"
+
+// rudder, elevator and motor speed control
 #include "pid.c"
 
 //int counter = 0;
