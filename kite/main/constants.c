@@ -32,12 +32,15 @@ float z_axis_trim = 0;
 float aux_trim = 0;
 float elev_trim = 0;
 
-float Py = 0;
-float Dy = 0;
-float Iy = 1;
-float Pz = 0;
-float Dz = 0;
-float Iz = 1;
+float Py = 1;
+float Dy = 1;
+float Iy = 0;
+float Pz = 1;
+float Dz = 1;
+float Iz = 0;
+float Ph = 1;
+float Dh = 1;
+float Ih = 0;
 
 // PINS for I2C:
 // (JLCPCB v1 board)
