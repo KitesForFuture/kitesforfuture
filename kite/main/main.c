@@ -1,3 +1,6 @@
+/* servo motor control example
+*/
+
 #include <math.h>
 #include <string.h>
 
@@ -14,44 +17,32 @@
 #include "driver/gpio.h"
 #include "driver/i2c.h"
 
-// some helper functions for mathematical operations
 #include "mymath.c"
 
 #include "timer.c"
 #include "constants.c"
-
-// read data from analog sensors, e.g. battery state
-#include "analog_sensors.c"
-// servo motors and propeller motor control
+#include "sensors.c"
 #include "motors.c"
-// i2c protocol for communication with mpu6050 and bmp280
+
 #include "interchip.c"
-// gyroscope and accelerometer
 #include "mpu6050.c"
-// barometer
 #include "bmp280.c"
-// estimate current height from pressure and acceleration
 #include "heightSensorFusion.c"
-
-#include "../../COMMON_FILES/RC.c"
-
-// determine wind direction
+#include "../../COMMON_FILES/RC2.c"
 #include "windDirection.c"
-// determine distance from ground station
 #include "lineLength.c"
-// angle towards wind direction in the plane parallel to ground
 #include "sidewaysAngle.c"
-// determine the kite's speed
 #include "kiteSpeed.c"
-// read battery state of charge from analog sensor
 #include "batteryPercentage.c"
 
-// rudder, elevator and motor speed control
+#include "motor_safety_bounds.c"
+#include "orientation_helpers.c"
 #include "control_glide_elevator.c"
 #include "control_glide_rudder.c"
 #include "control_hover_elevator.c"
 #include "control_hover_rudder.c"
 #include "control_hover_height.c"
+
 #include "pid.c"
 
 //int counter = 0;
@@ -99,15 +90,21 @@ void app_main(void){
 		update();
 		
 		// trim for balancing is between -0.3 and 0.3 (measured in radians with assumption sin(x)=x near 0)
-		setZAxisTrim(0.);
-		setAUXTrim(0.);
-		setElevatorTrim(0.);
-
+		
 		// set control gains from input signal
-		Py = pow(10., 2.*((float)receivedSignal[0])/(3003.0));
-		Dy = pow(10., 2.*((float)receivedSignal[1])/(3003.0));
-		Dz = pow(10., 2.*((float)receivedSignal[2])/(3003.0));
-		Pz = pow(10., 2.*((float)receivedSignal[3])/(3003.0));
+		
+		LinksRechtsOffset = 140*((float)receivedSignal[0])/(3003.0); // [-70;70]
+		setRateOfClimb(pow(10.,2.*((float)receivedSignal[1])/(3003.0)));
+		
+		//signal2 = ((float)receivedSignal[2])/(3003.0);
+		//signal3 = ((float)receivedSignal[3])/(3003.0);
+		
+		//Pz = pow(10., 2.*((float)receivedSignal[0])/(3003.0));
+		//Dz = pow(10., 2.*((float)receivedSignal[1])/(3003.0));
+		
+		// = 120.*((float)receivedSignal[2])/(3003.0);
+		//Dz = pow(10., 2.*((float)receivedSignal[3])/(3003.0));
+		HochRunterOffset = 100*((float)receivedSignal[4])/(3003.0); // [-50;50]
 
 
 		
@@ -120,7 +117,14 @@ void app_main(void){
 		// START HOVER LAND AT 10% battery or signal loss
 		
 		if(landing == false){
-			setGoalHeight(-5.0 - 10.0*((float)receivedSignal[5])/(3003.0));
+			if((float)receivedSignal[5] > -750){
+				setGoalHeight(-1);
+			}else if((float)receivedSignal[5] > -2250){
+				setGoalHeight(0);
+			}else{
+				setGoalHeight(1);
+			}
+			//setGoalHeight(-5.0 - 100.0*((float)receivedSignal[5])/(3003.0));
 			setYAxisTrim(0.);
 			
 			//if(queryTimer(t) > 35){

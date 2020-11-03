@@ -124,6 +124,7 @@ float rot[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
 
 //int timeForNormalization = 0;
 
+//TODO: is this ever used? xAxis w.r.t. the PCB, not w.r.t. the plane! (see constants.c Ctrl-F "rot[")
 void rotateAroundXAxis(float radians){
 	float diff[9];
 	diff[0] = 1; //maybe can replace by 1 here
@@ -314,7 +315,7 @@ void initMPU6050(){
 	mpu_pos_avg.accel_z /= mpu_pos_avg.accel_norm;
 	
 	//OVERRIDE EVERYTHING ABOVE TO MAKE Y-AXIS POINT TOWARDS CENTRE OF THE EARTH
-	mpu_pos_avg.accel_x = 0;
-	mpu_pos_avg.accel_y = 1;
+	mpu_pos_avg.accel_x = -1;
+	mpu_pos_avg.accel_y = 0;
 	mpu_pos_avg.accel_z = 0;
 }

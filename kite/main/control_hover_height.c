@@ -1,47 +1,69 @@
+float lastHeight = 0;
+float P_h; // for smoothing
+float smooth_C_h = 0;
+
 float goalHeight = -5;
 float targetHeight = -1;
 float rateOfClimb = 0;
-float lastHeight = 0;
+
 float oldGoalHeight = -5;
 
-void setGoalHeight(float goalheight)
-{
+void setGoalHeight(float goalheight){
 	goalHeight = goalheight;
 	//targetHeight = getHeight();
 }
 
-float P_h = 0.; 
-float control_hover_height(float P, float I, float D, float C)
-{
-    float current_height = getHeight();
+void setRateOfClimb(float rate){
+	rateOfClimb = fabs(rate);
+}
 
-	if (fabs(goalHeight - targetHeight) > 0.1)
-	{
-		float adjustedClimbRate = rateOfClimb;
-		if (targetHeight < 2)
-			adjustedClimbRate = 0.2; // for descending slowly during the last 3 meters
-		if (goalHeight - targetHeight > 0)
-			adjustedClimbRate = 2.0;
-		targetHeight += time_difference * adjustedClimbRate * sign(goalHeight - targetHeight);
+// PID CONTROLLER FOR THE HEIGHT
+float hover_height_control(){
+	
+	
+	// letting targetHeight go towards goalHeight at rateOfClimb
+	float adjustedClimbRate = rateOfClimb*3;
+	if(targetHeight < 2) adjustedClimbRate = 0.2; // for descending slowly during the last 3 meters
+	targetHeight += time_difference*adjustedClimbRate*goalHeight;
+	
+	/*
+	float adjustedClimbRate = rateOfClimb;
+	if(fabs(goalHeight-targetHeight) > 0.1){
+		if(targetHeight < 2) adjustedClimbRate = 0.2; // for descending slowly during the last 3 meters
+		//if(goalHeight-targetHeight > 0) adjustedClimbRate = 2.0;
+		targetHeight += time_difference*adjustedClimbRate*sign(goalHeight-targetHeight);
 	}
-
+	
 	// exponential average smoothing of P_h
-	//TODO: bound 3.5+(targetHeight - current_height) from below.
-	P_h = 0.3 * P_h + 0.7 * (3.5 + (targetHeight - current_height));
-
+	//TODO: bound 3.5+(targetHeight - getHeight()) from below.
+	*/
+	
+	P_h = 0.3*P_h + 0.7*(3.5+(targetHeight - getHeight()));
+	
 	// in meters per second
 	// D_h, deviation from desired rate of climb
 	// negative: climbing faster than needed
 	// positive: climbing slower than needed
-
+	
 	float tmp_variable = 0;
-	if (time_difference != 0)
-	{
-		tmp_variable = (lastHeight - current_height) / time_difference;
+	if(time_difference != 0){
+		tmp_variable = (lastHeight - getHeight())/time_difference;
 	}
-	float D_h = (tmp_variable + sign(goalHeight - current_height) * rateOfClimb);
-	lastHeight = current_height;
-
-	return D * D_h + P * P_h;
+	float D_h = (tmp_variable+sign(goalHeight-getHeight())*adjustedClimbRate);
+	lastHeight = getHeight();
+	
+	float C_h = 0.7*(3*D_h + 10*P_h);
+	
+	// transition_factor is 1 when nose pointing to zenit, 0 when nose horizontal, -1 when diving straight down
+	float transition_factor = angle_nose_horizon() * 0.64;
+	// (GRADUALLY) ...
+	
+	C_h = C_h*transition_factor + (1.0-transition_factor)*MOTOR_SPEED_WHEN_HORIZONTAL;
+	
+	// ... STOP CONTROLLING THE HEIGHT using the motors when angle to horizon is 0 or negative
+	if(transition_factor < 0) C_h = 0.0;
+	
+	smooth_C_h = smooth_C_h * 0.9 + C_h * 0.1;
+	
+	return smooth_C_h;
 }
-
