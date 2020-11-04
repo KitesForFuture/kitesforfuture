@@ -7,10 +7,10 @@ float MINUS_DP_BY_DT_reading = 0;
 // To calibrate set CALIBRATION_MODE_MPU6050 to 1, output acc_calibrationx,y,z preferably via wifi, set accel_offset_* to the midpoints between highest and lowest reading.
 #define CALIBRATION_MODE_MPU6050 0
 float acc_calibrationx = 0;float acc_calibrationy = 0;float acc_calibrationz = 0;
+
 //kite2: (-0.41, -0.04, 1.8)
 //jochens Lieblingsflieger (-0.65, -0.1, 0.25)
 //kite4_raketenschwanz: (-0.45, -0.2, -1.7)
-
 float accel_offset_x = -0.45;
 float accel_offset_y = -0.2;
 float accel_offset_z = -1.7;
@@ -20,27 +20,32 @@ float accel_offset_y = -0.2;
 float accel_offset_z = -1.7;
 */
 
-#define SERVO_RUDDER_MAX_ANGLE 45
-#define SERVO_RUDDER_MIN_ANGLE -45
-#define SERVO_ELEVON_MAX_ANGLE 45
-#define SERVO_ELEVON_MIN_ANGLE -45
-#define MOTOR_MAX_SPEED 55 // maximum motor speed, usually used for ensuring safety in testing
+#define SERVO_RUDDER_ZERO_ANGLE -15.7
+#define SERVO_RUDDER_MAX_ANGLE 85
+#define SERVO_RUDDER_MIN_ANGLE -85
+
+#define SERVO_ELEVATOR_ZERO_ANGLE 1.84
+#define SERVO_ELEVATOR_MAX_ANGLE 65
+#define SERVO_ELEVATOR_MIN_ANGLE -65
+
+#define ELEVATOR_GLIDE_NEUTRAL_ANGLE 22
+#define RUDDER_GLIDE_THRESHOLD 10
+
+#define MOTOR_MAX_SPEED 30 // maximum motor speed, usually used for ensuring safety in testing
 #define MOTOR_SPEED_WHEN_HORIZONTAL 14
+
+#define BACKWARDS_TILT_ANGLE 0.17 // ca. 10 degrees
 
 float y_axis_trim = 0;
 float z_axis_trim = 0;
 float aux_trim = 0;
-float elev_trim = 0;
 
 float Py = 1;
 float Dy = 1;
-float Iy = 0;
+//float Iy = 0;
 float Pz = 1;
 float Dz = 1;
-float Iz = 0;
-float Ph = 1;
-float Dh = 1;
-float Ih = 0;
+//float Iz = 0;
 
 // PINS for I2C:
 // (JLCPCB v1 board)
@@ -63,7 +68,7 @@ static gpio_num_t i2c_gpio_scl_bus1 = 19;
 #define liftCoeffTimesArea 0.5 // lift coefficient * wing area * 2.78
 
 // here we can define a(n orthogonal) basis transformation of the coordinate system, reminder T*A*T^{-1} (, T^{-1} = T^{\transp} )
-#define rot0 rot[4]
+/*#define rot0 rot[4]
 #define rot1 -rot[3]
 #define rot2 rot[5]
 #define rot3 -rot[1]
@@ -78,6 +83,28 @@ static gpio_num_t i2c_gpio_scl_bus1 = 19;
 #define gyroz mpu_pos.gyro_z
 #define avgGyrox -mpu_pos_avg.gyro_y
 #define avgGyroy mpu_pos_avg.gyro_x
+#define avgGyroz mpu_pos_avg.gyro_z
+*/
+
+// this is the angle between the MPU6050 x-axis and the logitudinal center axis of the plane (where the nose and propellers point)
+// a positive value indicates that the MPU x-axis points upwards in gliding flight
+#define pcb_y_axis_rotation_angle 0.17 // ca. 10 degrees
+
+#define rot0 rot[0]
+#define rot1 rot[1]
+#define rot2 -rot[2]
+#define rot3 rot[3]
+#define rot4 rot[4]
+#define rot5 -rot[5]
+#define rot6 -rot[6]
+#define rot7 -rot[7]
+#define rot8 rot[8]
+
+#define gyrox -mpu_pos.gyro_x
+#define gyroy -mpu_pos.gyro_y
+#define gyroz mpu_pos.gyro_z
+#define avgGyrox -mpu_pos_avg.gyro_x
+#define avgGyroy -mpu_pos_avg.gyro_y
 #define avgGyroz mpu_pos_avg.gyro_z
 
 #define TOP_LEFT 2

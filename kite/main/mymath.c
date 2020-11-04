@@ -1,6 +1,12 @@
 #define true 1
 #define false 0
 
+// acos function continuously extended beyond -1 and 1.
+float safe_acos(float number_more_or_less_between_one_and_minus_one){
+	return (fabs(number_more_or_less_between_one_and_minus_one) < 1) ? acos(number_more_or_less_between_one_and_minus_one) : 0;
+	return 0;
+}
+
 int smallpow(int x, int p){
 	int ret = 1;
 	for(int i = 0; i < p; i++){
@@ -190,13 +196,15 @@ void copyVector(float source[], float destination[], int length){
 	}
 }
 
-void normalize(float source[], float destination[], int length){
+float normalize(float source[], float destination[], int length){
 	float norm = sqrt(scalarProductOfMatrices(source, source, length));
-	if(norm > 0.000000000000001){
+	if(norm > 0.00001){
 		scalarMult(1.0/norm, source, destination, length);
 	}else{
 		copyVector(source, destination, length);
 	}
+	
+	return norm;
 }
 
 void addMatrices(float A[], float B[], float destination[], int length){

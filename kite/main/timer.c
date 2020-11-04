@@ -7,7 +7,7 @@ int64_t startTimer(){
 // time since "timer" in seconds
 float queryTimer(int64_t timer){
 	int64_t currentTime = esp_timer_get_time();
-	return 0.000001*(float)(currentTime - timer); 
+	return 0.000001*(float)(currentTime - timer);
 }
 
 int64_t startTimeForUptime = 0;
