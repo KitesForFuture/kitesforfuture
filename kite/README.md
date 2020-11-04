@@ -1,19 +1,16 @@
-# MCPWM servo motor control Example
+# Autonomous Kite Airplane
 
-This example will show you how to use MCPWM module to control servo motor
- 
-Assign pulse width range and the maximum degree, accordingly the servo will move from 0 to maximum degree continuously
- 
+Code runs for example on ESP32 Devkit C.
 
-## Step 1: Pin assignment
-* GPIO18 is assigned as the MCPWM signal for servo motor 
+## DEFAULT PIN ASSIGNMENTS
 
+- Motors on 12, 13, 26, 27
+- Sensors on 32, 33, 34, 35, SP and SN (fixed by hardware?)
+- MPU6050 on 14(sda), 25(scl)
+- BMP280 on 18(sda), 19(scl)
 
-## Step 2: Connection
-* connect GPIO18 with servo pwm signal
-* other two wires of servo motor are VCC and GND
+See analog_sensors.c, motors.c, constants.c
 
+## HARDWARE CONFIGURATION and SENSOR CALIBRATION
 
-## Step 3: Initialize MCPWM
-* You need to set the frequency(generally 50 Hz) and duty cycle of MCPWM timer
-* You need to set the MCPWM channel you want to use, and bind the channel with one of the timers
+See constants.c
