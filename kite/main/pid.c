@@ -4,6 +4,14 @@
 
 int flightMode = GLIDE_MODE;
 
+void gotoHoverMode(){
+	flightMode = HOVER_MODE;
+	targetHeight = getHeight();
+}
+
+void gotoGlideMode(){
+	flightMode = GLIDE_MODE;
+}
 
 void calculatePID(){
 

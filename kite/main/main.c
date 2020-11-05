@@ -121,9 +121,9 @@ void app_main(void){
 
 		
 		if((float)receivedSignal[5] > -100){ // third knob from the right turns on manual kite fly mode, which ignores orientation
-			flightMode = GLIDE_MODE;
+			gotoGlideMode();
 		}else{
-			flightMode = HOVER_MODE;
+			gotoHoverMode();
 		}
 		
 		// START HOVER LAND AT 10% battery or signal loss
