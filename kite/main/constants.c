@@ -32,7 +32,7 @@ float accel_offset_z = -1.7;
 #define RUDDER_GLIDE_THRESHOLD 10
 
 #define MOTOR_MAX_SPEED 30 // maximum motor speed, usually used for ensuring safety in testing
-#define MOTOR_SPEED_WHEN_HORIZONTAL 14
+#define MOTOR_SPEED_WHEN_HORIZONTAL 7
 
 #define BACKWARDS_TILT_ANGLE 0.17 // ca. 10 degrees
 

@@ -27,8 +27,8 @@ float hover_elevator_control(){
 	angleDifference *= ((tmp_variable > 0) - (tmp_variable < 0));// <--- sign(<b,z>)
 	
 	// TODO: use pcb_y_axis_rotation_angle from constants.c, make it uppercase across whole code. and use BACKWARDS_TILT_ANGLE
-	float P_y = -76/*pcb glued in with slight forward pitch*/ + 200*angleDifference;
+	float P_y = 200*angleDifference;
 	float D_y = gyroy-avgGyroy;
 	//return 1.75*(-24 -0.12*Dy*D_y + factor*factor*(0.6*Py*P_y /*+ Iy*I_y*/ + 33));
-	return 42 + 0.21*Dy*D_y + factor*factor*(-Py*P_y /*+ Iy*I_y*/ -57.75);
+	return 42 + 0.21*Dy*D_y + factor*factor*(-Py*P_y /*+ Iy*I_y*/ -57.75 + 10 + 76/*pcb glued in with slight forward pitch*/);
 }

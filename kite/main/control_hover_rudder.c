@@ -1,4 +1,6 @@
 // PID CONTROLLER FOR KEEPING THE Y-AXIS LEVEL (Z-AXIS CONTROLLER)
+float P_z = 0;
+float D_z = 0;
 float hover_rudder_control(){
 	// rot is the rotation matrix of the drone in space. last column (z-axis) and 
 	// z-values of the rotated x and y axes are accurate to 0.03 degrees, other values drift by 1 degree per minute. rot is an array of dimension 9, rot[6] is 3rd (2nd) row, 1st (0th) column.
@@ -25,10 +27,10 @@ float hover_rudder_control(){
 	float tmp_variable = scalarProductOfMatrices(b, y, 3);
 	angleDifference *= ((tmp_variable > 0) - (tmp_variable < 0));
 	
-	float P_z = factor*(206.5 * angleDifference /* + LinksRechtsOffset*/);
+	P_z = factor*(206.5 * angleDifference /* + LinksRechtsOffset*/);
 	// D_z is in degree per second
 	// D_z STAYS ACTIVE EVEN WHEN KITE IS HORIZONTAL
-	float D_z = gyroz - avgGyroz;
+	D_z = gyroz - avgGyroz;
 	
 	return Dz*D_z - /*(1.0-angleDifference)**/1.2*Pz*P_z + SERVO_RUDDER_ZERO_ANGLE;
 }

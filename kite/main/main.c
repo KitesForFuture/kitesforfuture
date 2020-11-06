@@ -130,11 +130,11 @@ void app_main(void){
 		
 		if(landing == false){
 			if((float)receivedSignal[5] > -750){
-				setGoalHeight(-1);
+				setGoalHeight(-1); // go down
 			}else if((float)receivedSignal[5] > -2250){
-				setGoalHeight(0);
+				setGoalHeight(0); // keep height
 			}else{
-				setGoalHeight(1);
+				setGoalHeight(1); // go up
 			}
 			//setGoalHeight(-5.0 - 100.0*((float)receivedSignal[5])/(3003.0));
 			setYAxisTrim(0.);

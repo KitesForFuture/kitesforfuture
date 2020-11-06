@@ -2,6 +2,7 @@ float lastHeight = 0;
 float P_h; // for smoothing
 float smooth_C_h = 0;
 
+// used as a switch for positive, negative or neutral climb
 float goalHeight = -5;
 float targetHeight = -1;
 float rateOfClimb = 0;
@@ -22,9 +23,11 @@ float hover_height_control(){
 	
 	
 	// letting targetHeight go towards goalHeight at rateOfClimb
-	float adjustedClimbRate = rateOfClimb*3;
+	float adjustedClimbRate = rateOfClimb;
 	if(targetHeight < 2) adjustedClimbRate = 0.2; // for descending slowly during the last 3 meters
-	targetHeight += time_difference*adjustedClimbRate*goalHeight;
+	if(fabs(targetHeight - getHeight()) < 1){
+		targetHeight += time_difference*adjustedClimbRate*goalHeight;
+	}
 	
 	/*
 	float adjustedClimbRate = rateOfClimb;
@@ -54,8 +57,9 @@ float hover_height_control(){
 	
 	float C_h = 0.7*(3*D_h + 10*P_h);
 	
-	// transition_factor is 1 when nose pointing to zenit, 0 when nose horizontal, -1 when diving straight down
+	// transition_factor is 1 when nose pointing to zenit, 0 when nose horizontal or lower
 	float transition_factor = angle_nose_horizon() * 0.64;
+	if(transition_factor < 0) transition_factor = 0;
 	// (GRADUALLY) ...
 	
 	C_h = C_h*transition_factor + (1.0-transition_factor)*MOTOR_SPEED_WHEN_HORIZONTAL;

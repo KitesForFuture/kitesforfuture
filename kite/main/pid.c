@@ -5,8 +5,10 @@
 int flightMode = GLIDE_MODE;
 
 void gotoHoverMode(){
-	flightMode = HOVER_MODE;
-	targetHeight = getHeight();
+	if(flightMode == GLIDE_MODE){
+		flightMode = HOVER_MODE;
+		targetHeight = getHeight();
+	}
 }
 
 void gotoGlideMode(){
@@ -46,5 +48,5 @@ void calculatePID(){
 	setAngle(TOP_LEFT, servoRudder);
 	
 	// SENDING DEBUGGING DATA TO GROUND
-	sendData(angle_nose_horizon() * 0.64, 0, 0, 0, 0, 0, 0, 0, LinksRechtsOffset, HochRunterOffset);
+	sendData(rot1, rot4, rot7, 0, 0, 0, 0, 0, servoElevator, servoRudder);
 }
