@@ -1,5 +1,16 @@
 # ESPNOW Example
 
+## TODO
+
+- range test > 10m
+- handle disconnect correctly
+
+
+
+
+
+
+
 (See the README.md file in the upper level 'examples' directory for more information about examples.)
 
 This example shows how to use ESPNOW of wifi. Example does the following steps:
