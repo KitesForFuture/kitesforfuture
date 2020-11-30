@@ -3,6 +3,7 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/queue.h" //TODO: is it used?
 
 #include "nvs_flash.h"
 #include "esp_wifi.h"
@@ -57,6 +58,7 @@
 #include "control_hover_height.c"
 #include "pid.c"
 
+#include "PWM_input.c"
 //int counter = 0;
 
 void init(){
@@ -75,6 +77,7 @@ void init(){
 	initHeightSensorFusion();
 	setNumberOfOmittedSends(0); // debugging info sent to pc every x iterations
 	
+	initPWM_Input();
 }
 
 void update(){
@@ -150,7 +153,6 @@ void app_main(void){
 		}
 		
 		calculatePID();
-	    
 	    
 	    
 	    

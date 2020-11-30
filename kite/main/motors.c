@@ -50,7 +50,9 @@ void initMotors(){
 // angle: -90 ... 90
 void setAngle(int motor, float degreeF){
 	int32_t degree = (int32_t)degreeF;
-	if(degree > 90 || degree < -90) return; //TODO: maybe replace with continuous extension, i.e. if(deg > 90) deg = 90; ...
+	//if(degree > 90 || degree < -90) return; //replaced with continuous extension, i.e. if(deg > 90) deg = 90; ...
+	if(degree > 90) degree = 90;
+	if(degree < -90) degree = -90;
 	mcpwm_unit_t unit = MCPWM_UNIT_0;
 	mcpwm_generator_t gen = MCPWM_OPR_A;
 	
