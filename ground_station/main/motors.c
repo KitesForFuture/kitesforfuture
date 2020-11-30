@@ -35,7 +35,7 @@ void initMotors(){
     mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, 12);
     mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, 13);
     mcpwm_gpio_init(MCPWM_UNIT_1, MCPWM0A, 27);
-    mcpwm_gpio_init(MCPWM_UNIT_1, MCPWM0B, 26);
+    mcpwm_gpio_init(MCPWM_UNIT_1, MCPWM0B, 26); //changed from 26 to 15, because 26 needed for DAC
     
     mcpwm_config_t pwm_config;
     pwm_config.frequency = 50;
