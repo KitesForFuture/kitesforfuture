@@ -41,11 +41,11 @@ void calculatePID(){
 	
 	
 	setAngle(TOP_RIGHT, servoElevator);
+	setAngle(TOP_LEFT, servoRudder);
 	//if(getUptime() > 5){
 		setSpeed(BOTTOM_LEFT, motorLeft);
 		setSpeed(BOTTOM_RIGHT, motorRight);
 	//}
-	setAngle(TOP_LEFT, servoRudder);
 	
 	// SENDING DEBUGGING DATA TO GROUND
 	sendData(rot1, rot4, rot7, 0, 0, 0, 0, 0, servoElevator, servoRudder);

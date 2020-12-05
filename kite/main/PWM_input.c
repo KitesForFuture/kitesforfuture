@@ -1,92 +1,66 @@
+#define PWM_INPUT_MIN_DUTY 8000
+#define PWM_INPUT_MAX_DUTY 16000
 
+#define NUM_PWM_INPUT_CHANNELS 4
+int pwm_input_channels[NUM_PWM_INPUT_CHANNELS] = {1, 2, 3, 4};
+int pwm_in_gpios[NUM_PWM_INPUT_CHANNELS] = {2, 0, 4, 5};
+RingbufHandle_t pwm_buffer_handles[NUM_PWM_INPUT_CHANNELS] = {NULL};
 
-/**
- * GPIO status:
- * GPIO2:  input, pulled up, interrupt from rising edge and falling edge
- */
+int pwm_input_value[NUM_PWM_INPUT_CHANNELS] = {PWM_INPUT_MIN_DUTY, PWM_INPUT_MIN_DUTY, PWM_INPUT_MIN_DUTY, PWM_INPUT_MIN_DUTY};
 
-#define GPIO_INPUT_IO_0     2
-#define GPIO_INPUT_PIN_SEL  (1ULL<<GPIO_INPUT_IO_0)
-#define ESP_INTR_FLAG_DEFAULT 0
-
-static xQueueHandle gpio_evt_queue = NULL;
-
-
-float rise_to_rise_time = 1;
-int64_t last_rise_time = 0;
-float duty = 1;
-
-static void IRAM_ATTR gpio_isr_handler(void* arg)
-{
-    uint32_t gpio_num = (uint32_t) arg;
-    xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
+float getPWMInput0to1normalized(int num){
+	float ret = ((float)(pwm_input_value[num] - PWM_INPUT_MIN_DUTY))/(PWM_INPUT_MAX_DUTY - PWM_INPUT_MIN_DUTY);
+	if(ret > 1) ret = 1;
+	if(ret < 0) ret = 0;
+	return ret;
 }
 
-static void gpio_task_example(void* arg)
-{
-    uint32_t io_num;
-    for(;;) {
-        if(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)) {
-            
-            if(gpio_get_level(io_num) == 1){
-            	// rising edge
-            	int64_t currentTime = esp_timer_get_time();
-				rise_to_rise_time = (float)(currentTime - last_rise_time);
-				last_rise_time = currentTime;
-            	
-            }else if (gpio_get_level(io_num) == 0){
-            	// falling edge
-            	int64_t currentTime = esp_timer_get_time();
-            	if(rise_to_rise_time != 0){
-	            	duty = 20*( (float)(currentTime - last_rise_time) ) / rise_to_rise_time -1;
-	            	if(duty < 0) duty = 0;
-	            	if(duty > 1) duty = 1;
-	            }
-            }
-            printf("GPIO[%d] intr, val: %d, duty = %f, rr_time = %f, lr_time = %lld\n", io_num, gpio_get_level(io_num), duty, rise_to_rise_time, last_rise_time);
-            
-            
-            //setSpeed(BOTTOM_LEFT, motorLeft);
-			//setSpeed(BOTTOM_RIGHT, motorRight);
-        }
-    }
+float getPWMInputMinus1to1normalized(int num){
+	return 2*getPWMInput0to1normalized(num)-1;
 }
 
-void initPWM_Input()
-{
-    gpio_config_t io_conf;
-
-    //interrupt of rising edge
-    io_conf.intr_type = GPIO_PIN_INTR_POSEDGE;
-    //bit mask of the pins, use GPIO4/5 here
-    io_conf.pin_bit_mask = GPIO_INPUT_PIN_SEL;
-    //set as input mode    
-    io_conf.mode = GPIO_MODE_INPUT;
-    //enable pull-up mode
-    io_conf.pull_up_en = 1;
-    gpio_config(&io_conf);
-
-    //change gpio intrrupt type for one pin
-    gpio_set_intr_type(GPIO_INPUT_IO_0, GPIO_INTR_ANYEDGE);
-
-    //create a queue to handle gpio event from isr
-    gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
-    //start gpio task
-    xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, 10, NULL);
-
-    //install gpio isr service
-    gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
-    //hook isr handler for specific gpio pin
-    gpio_isr_handler_add(GPIO_INPUT_IO_0, gpio_isr_handler, (void*) GPIO_INPUT_IO_0);
+void initPWMInput(){
 	
-	//TODO: just to show that it's possible?
+	rmt_config_t rmt_channel; // = RMT_DEFAULT_CONFIG_RX(2, 1);
 	
-    //remove isr handler for gpio number.
-    gpio_isr_handler_remove(GPIO_INPUT_IO_0);
-    //hook isr handler for specific gpio pin again
-    gpio_isr_handler_add(GPIO_INPUT_IO_0, gpio_isr_handler, (void*) GPIO_INPUT_IO_0);
-
-	//TODO: this looks useful:
-	//vTaskDelay(1000 / portTICK_RATE_MS);
+	for(int i = 0; i < NUM_PWM_INPUT_CHANNELS; i++){
+		rmt_channel.channel = (rmt_channel_t) pwm_input_channels[i];
+		rmt_channel.gpio_num = (gpio_num_t) pwm_in_gpios[i];
+		rmt_channel.clk_div = 10;//(80000000/8/1000000); // = 10, 80 causes kernel panic, 5 causes doubling of re/per/ceived pulse widths but not able to handle 2*16000=32000, uint8t is in [0, 255] so why does 80 not work?
+		rmt_channel.mem_block_num = 1;
+		rmt_channel.rmt_mode = RMT_MODE_RX; // RX means receive (TX would mean transceive=emit)
+		rmt_channel.rx_config.filter_en = true;
+		rmt_channel.rx_config.filter_ticks_thresh = 100; // TODO: what do these mean?
+		rmt_channel.rx_config.idle_threshold = 3500 * 8; // TODO: what do these mean?
+		
+		rmt_config(&rmt_channel);
+		
+		rmt_driver_install(rmt_channel.channel, (size_t)100, 0);
+		
+		rmt_get_ringbuf_handle(rmt_channel.channel, &(pwm_buffer_handles[i]));
+		
+		rmt_rx_start(rmt_channel.channel, 1); // 1 = boolean true
+	}
 }
 
+uint32_t length = 0;
+rmt_item32_t *items = NULL;
+
+void updatePWMInput(){
+	
+	for(int i = 0; i < NUM_PWM_INPUT_CHANNELS; i++){
+		
+		while(1){
+			// retrieve item from ring buffer BY REFERENCE(!)
+			items = (rmt_item32_t *) xRingbufferReceive(pwm_buffer_handles[i], &length/*will be 4 (meaning 4 bytes, i.e. 32 bits)*/, 1/*if too high buffer runs full for long pulses?*/);
+			if (items) {
+			   	// items->duration0 is between 8000 and 16000, further members of "items" are: items->level0, items->duration1, items->level1
+			   	pwm_input_value[i] = items->duration0;
+			   	// "RETURNING" the REFERENCE to the ring buffer, so it feels confident to overwrite it when neccessary.
+				vRingbufferReturnItem(pwm_buffer_handles[i], (void *) items);
+			}else{
+				break;
+			}
+		}
+	}
+}

@@ -50,13 +50,15 @@ void init(){
 	setRole(KITE);
 	network_setup();
 	
-	initDAC();
+	//initDAC();
 	initGPIO();
 	initUptime();
 	setNumberOfOmittedSends(0); // debugging info sent to pc every x iterations
 	
 	offset = 89*(((float)getSensor(3))/(3003.0));
 	offset2 = 89*(((float)getSensor(1))/(3003.0));
+	
+	//switchToReelInMode(); // TODO: maybe this here is sufficient and no need to call it all the time during first 5 seconds below in main loop
 	
 	setSpeed(0, 0);
 	setSpeed(1, 0);
@@ -68,26 +70,28 @@ float getVin(){
 	return 11.0*(((float)getSensor(4) - 142)/(3003.0));
 }
 
+/*
 void setCurrent(float zeroToFive){
 	setDACVoltage(25, zeroToFive*2.5/6.25);
 }
+*/
 
 Timer last_switching_event = 0;
 
 void switchToReelInMode(){
 	GROUND_STATION_MODE = REEL_IN_MODE;
 	last_switching_event = startTimer();
-	setGPIO_0(1);
-	setGPIO_1(1);
-	setGPIO_2(1);
+	setGPIO_0(0);
+	setGPIO_1(0);
+	setGPIO_2(0);
 }
 
 void switchToEnergyGenerationMode(){
 	GROUND_STATION_MODE = ENERGY_GENERATION_MODE;
 	last_switching_event = startTimer();
-	setGPIO_0(0);
-	setGPIO_1(0);
-	setGPIO_2(0);
+	setGPIO_0(1);
+	setGPIO_1(1);
+	setGPIO_2(1);
 }
 
 
@@ -108,14 +112,14 @@ void app_main(void){
 		v += 0.01;
 		if(v > 3.3) v = 0;
 		
-		getReelInCurrentInAmps();
+		updateCurrentSensing();
 		
 		
-		if(getUptime() < 5){
+		if(getUptime() < 6){
 			// for the first 5 seconds, just let the ESC initialize
-			setGPIO_0(1);
-			setGPIO_1(1);
-			setGPIO_2(1);
+			setGPIO_0(0);
+			setGPIO_1(0);
+			setGPIO_2(0);
 			setSpeed(0, 0);
 			setSpeed(1, 0);
 			setSpeed(2, 0);
@@ -129,12 +133,16 @@ void app_main(void){
 			potiValue2 = -potiValue2 + 0.001;
 			
 			//send interesting Data via WIFI
-			sendData(potiValue, potiValue2, getReelInCurrentInAmps(), getVin(), 3.12*((float)getSensor(2)-142)/(3003.0), 3.12*((float)getSensor(5)-142)/(3003.0), 0, 0, lowRangeInAmps, highRangeInAmps);
+			sendData(potiValue, potiValue2, getReelInCurrentInAmps(), getProductionCurrentInAmps(), getVin(), 3.12*((float)getSensor(2)-142)/(3003.0), 3.12*((float)getSensor(5)-142)/(3003.0), 0, lowRangeInAmps, highRangeInAmps);
 			
 			// control current
 			// TODO: increase current proportional to Vin
-			setCurrent(10*potiValue2/89.0);
-				
+			// now done by Statron 3229, elektronische Last
+			//setCurrent(10*potiValue2/89.0);
+			
+			//setSpeed(3, potiValue2);
+			
+			
 			if(GROUND_STATION_MODE == REEL_IN_MODE){
 				if(queryTimer(last_switching_event) > 0.5 && decideSpeed() == 1){
 					switchToEnergyGenerationMode();
@@ -143,12 +151,11 @@ void app_main(void){
 				setSpeed(3, getSpeed());
 			}else{
 				//wait for 3 seconds AND V_in to be low, before switching back
-				if(queryTimer(last_switching_event) > 1 && getVin() < 0.3){
+				if(queryTimer(last_switching_event) > 1 /*&& getVin() < 0.3*/ && getProductionCurrentInAmps() < 0.1){
 					switchToReelInMode();
 				}
-				
-				
 			}
+			
 		}
 		
 	    vTaskDelay(1.0);

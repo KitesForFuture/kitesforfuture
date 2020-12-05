@@ -3,11 +3,13 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "driver/rmt.h"
 #include "freertos/queue.h" //TODO: is it used?
 
 #include "nvs_flash.h"
 #include "esp_wifi.h"
 #include "esp_now.h"
+
 
 #include "driver/mcpwm.h"
 #include "esp_adc_cal.h"
@@ -77,7 +79,7 @@ void init(){
 	initHeightSensorFusion();
 	setNumberOfOmittedSends(0); // debugging info sent to pc every x iterations
 	
-	initPWM_Input();
+	initPWMInput();
 }
 
 void update(){
@@ -89,6 +91,7 @@ void update(){
 	updateLineLength();
 	updateSidewaysAngle();
 	updateKiteSpeed();
+	updatePWMInput();
 }
 
 void app_main(void){
@@ -154,7 +157,14 @@ void app_main(void){
 		
 		calculatePID();
 	    
-	    
+	    // OVERWRITE CONTROLS BY MANUAL RC
+	    if(getPWMInput0to1normalized(0) < 0.25){
+			setAngle(TOP_RIGHT, getPWMInputMinus1to1normalized(2)*90);
+			setAngle(TOP_LEFT, getPWMInputMinus1to1normalized(1)*90);
+			
+			setSpeed(BOTTOM_LEFT, getPWMInput0to1normalized(3)*90);
+			setSpeed(BOTTOM_RIGHT, getPWMInput0to1normalized(3)*90);
+		}
 	    
 	    /*
 	    if(counter == 10){
