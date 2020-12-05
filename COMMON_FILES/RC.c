@@ -5,7 +5,7 @@
 #define RC_MODE 0
 #define DATA_MODE 1
 
-#define DATALENGTH 10
+#define DATALENGTH 23
 
 // HERE YOU CAN DEFINE THE ROLE AS SENDER OR RECEIVER:
 int ROLE = KITE;
@@ -17,7 +17,7 @@ int firstTime = 1;
 
 int signalOffset[6] = {0,0,0,0,0,0};
 int receivedSignal[6] = {0,0,0,0,0,0};
-float receivedData[DATALENGTH] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+float receivedData[DATALENGTH] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
 typedef struct __attribute__((packed)) esp_now_msg_t
 {
@@ -109,7 +109,7 @@ static void msg_recv_cb(const uint8_t *mac_addr, const uint8_t *data, int len)
 				for(int i = 0; i < DATALENGTH; i++){
 					receivedData[i] = msg.data[i];
 				}
-				printf("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", receivedData[0], receivedData[1], receivedData[2], receivedData[3], receivedData[4], receivedData[5], receivedData[6], receivedData[7], receivedData[8], receivedData[9]);
+				printf("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", receivedData[0], receivedData[1], receivedData[2], receivedData[3], receivedData[4], receivedData[5], receivedData[6], receivedData[7], receivedData[8], receivedData[9],receivedData[10], receivedData[11], receivedData[12], receivedData[13], receivedData[14], receivedData[15], receivedData[16], receivedData[17], receivedData[18], receivedData[19], receivedData[20], receivedData[21], receivedData[22]);
 			}
 		}
 	}
@@ -225,7 +225,7 @@ void setNumberOfOmittedSends(int n){
 	numberOfOmittedSends = n;
 }
 
-void sendData(float data0, float data1, float data2, float data3, float data4, float data5, float data6, float data7, float data8, float data9){
+void sendData(float data0, float data1, float data2, float data3, float data4, float data5, float data6, float data7, float data8, float data9, float data10, float data11, float data12, float data13, float data14, float data15, float data16, float data17, float data18, float data19, float data20, float data21, float data22){
 	
 	if(counterForOmittedSends < numberOfOmittedSends){
 		counterForOmittedSends ++;
@@ -247,6 +247,19 @@ void sendData(float data0, float data1, float data2, float data3, float data4, f
 	to_be_sent[7] = data7;
 	to_be_sent[8] = data8;
 	to_be_sent[9] = data9;
+	to_be_sent[10] = data10;
+	to_be_sent[11] = data11;
+	to_be_sent[12] = data12;
+	to_be_sent[13] = data13;
+	to_be_sent[14] = data14;
+	to_be_sent[15] = data15;
+	to_be_sent[16] = data16;
+	to_be_sent[17] = data17;
+	to_be_sent[18] = data18;
+	to_be_sent[19] = data19;
+	to_be_sent[20] = data20;
+	to_be_sent[21] = data21;
+	to_be_sent[22] = data22;
 	sendDataArray(to_be_sent);
 }
 
