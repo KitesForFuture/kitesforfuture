@@ -69,5 +69,5 @@ float hover_height_control(){
 	
 	smooth_C_h = smooth_C_h * 0.9 + C_h * 0.1;
 	
-	return smooth_C_h;
+	return 3*smooth_C_h;
 }
