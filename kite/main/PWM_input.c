@@ -1,3 +1,5 @@
+float smoothedSWC = 0;
+
 #define PWM_INPUT_MIN_DUTY 8000
 #define PWM_INPUT_MAX_DUTY 16000
 

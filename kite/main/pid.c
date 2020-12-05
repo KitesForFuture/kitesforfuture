@@ -15,6 +15,11 @@ void gotoGlideMode(){
 	flightMode = GLIDE_MODE;
 }
 
+float servoRudder = 0;
+float servoElevator = 0;
+float motorLeft = 0;
+float motorRight = 0;
+
 void calculatePID(){
 
 	// MOTORS
@@ -24,8 +29,8 @@ void calculatePID(){
 	if(C_h < 0) C_h = 0;
 	*/
 	
-	float motorLeft = flightMode == HOVER_MODE ? hover_height_control() : 0;
-	float motorRight = motorLeft;
+	motorLeft = flightMode == HOVER_MODE ? hover_height_control() : 0;
+	motorRight = motorLeft;
 	
 	//TODO: power mode, haha :D - Use with care!!!!!
 	/*
@@ -36,17 +41,9 @@ void calculatePID(){
 	*/
 	
 	// MIXING PID FOR Z-AXIS AND X-AXIS
-	float servoRudder = (flightMode == GLIDE_MODE || flightMode == MOTORPLANE_MODE) ? glide_rudder_control() : hover_rudder_control();
-	float servoElevator = (flightMode == GLIDE_MODE || flightMode == MOTORPLANE_MODE) ? glide_elevator_control() : hover_elevator_control();
+	servoRudder = (flightMode == GLIDE_MODE || flightMode == MOTORPLANE_MODE) ? glide_rudder_control() : hover_rudder_control();
+	servoElevator = (flightMode == GLIDE_MODE || flightMode == MOTORPLANE_MODE) ? glide_elevator_control() : hover_elevator_control();
 	
 	
-	setAngle(TOP_RIGHT, servoElevator);
-	setAngle(TOP_LEFT, servoRudder);
-	//if(getUptime() > 5){
-		setSpeed(BOTTOM_LEFT, motorLeft);
-		setSpeed(BOTTOM_RIGHT, motorRight);
-	//}
 	
-	// SENDING DEBUGGING DATA TO GROUND
-	sendData(rot1, rot4, rot7, 0, 0, 0, 0, 0, servoElevator, servoRudder);
 }

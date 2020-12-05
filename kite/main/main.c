@@ -58,9 +58,9 @@
 #include "control_hover_elevator.c"
 #include "control_hover_rudder.c"
 #include "control_hover_height.c"
+#include "PWM_input.c"
 #include "pid.c"
 
-#include "PWM_input.c"
 //int counter = 0;
 
 void init(){
@@ -103,30 +103,22 @@ void app_main(void){
 	int landing = false;
 	
 	
+	
 	while(1){
 		
 		update();
 		
-		// trim for balancing is between -0.3 and 0.3 (measured in radians with assumption sin(x)=x near 0)
-		
+	    smoothedSWC = 0.9*smoothedSWC + 0.1*getPWMInput0to1normalized(0);
+	    
 		// set control gains from input signal
 		
 		LinksRechtsOffset = 140*((float)receivedSignal[0])/(3003.0); // [-70;70]
-		setRateOfClimb(pow(10.,2.*((float)receivedSignal[1])/(3003.0)));
-		
-		//signal2 = ((float)receivedSignal[2])/(3003.0);
-		//signal3 = ((float)receivedSignal[3])/(3003.0);
-		
-		//Pz = pow(10., 2.*((float)receivedSignal[0])/(3003.0));
-		//Dz = pow(10., 2.*((float)receivedSignal[1])/(3003.0));
-		
-		// = 120.*((float)receivedSignal[2])/(3003.0);
-		//Dz = pow(10., 2.*((float)receivedSignal[3])/(3003.0));
 		HochRunterOffset = 100*((float)receivedSignal[4])/(3003.0); // [-50;50]
-
-
 		
-		if((float)receivedSignal[5] > -100){ // third knob from the right turns on manual kite fly mode, which ignores orientation
+		//setRateOfClimb(pow(10.,2.*((float)receivedSignal[1])/(3003.0)));
+		
+		//if((float)receivedSignal[5] > -100){ // third knob from the right turns on manual kite fly mode, which ignores orientation
+		if(smoothedSWC < 0.25){
 			gotoGlideMode();
 		}else{
 			gotoHoverMode();
@@ -135,6 +127,7 @@ void app_main(void){
 		// START HOVER LAND AT 10% battery or signal loss
 		
 		if(landing == false){
+			/*
 			if((float)receivedSignal[5] > -750){
 				setGoalHeight(-1); // go down
 			}else if((float)receivedSignal[5] > -2250){
@@ -142,29 +135,50 @@ void app_main(void){
 			}else{
 				setGoalHeight(1); // go up
 			}
+			*/
+			if(smoothedSWC > 0.75){
+				setGoalHeight(-1); // go down
+			}else{
+				setGoalHeight(1); // go up
+			}
 			//setGoalHeight(-5.0 - 100.0*((float)receivedSignal[5])/(3003.0));
-			setYAxisTrim(0.);
+			setYAxisTrim(0.); // ???
 			
 			//if(queryTimer(t) > 35){
 			
-			if(timeSinceLastReceiveInSeconds() > 3.0 || (getBatteryPercentage() < 0.10 && getUptime() > 10)){
-				setGoalHeight(-5);
-				setYAxisTrim(0.0);
+			if(/*timeSinceLastReceiveInSeconds() > 3.0 ||*/ (getBatteryPercentage() < 0.10 && getUptime() > 10)){
+				setGoalHeight(-1);
+				setYAxisTrim(0.0); // ???
 				landing = true;
 			}
 			
 		}
 		
 		calculatePID();
+		
+		
 	    
 	    // OVERWRITE CONTROLS BY MANUAL RC
-	    if(getPWMInput0to1normalized(0) < 0.25){
-			setAngle(TOP_RIGHT, getPWMInputMinus1to1normalized(2)*90);
-			setAngle(TOP_LEFT, getPWMInputMinus1to1normalized(1)*90);
-			
-			setSpeed(BOTTOM_LEFT, getPWMInput0to1normalized(3)*90);
-			setSpeed(BOTTOM_RIGHT, getPWMInput0to1normalized(3)*90);
+	    if(smoothedSWC < 0.25){
+	    	servoElevator = getPWMInputMinus1to1normalized(2)*60;
+	    	servoRudder = getPWMInputMinus1to1normalized(1)*60;
+	    	
+	    	motorLeft = getPWMInput0to1normalized(3)*90;
+	    	motorRight = getPWMInput0to1normalized(3)*90;
 		}
+		
+		setAngle(TOP_RIGHT, servoElevator);
+		setAngle(TOP_LEFT, -servoRudder);
+		//if(getUptime() > 5){
+			setSpeed(BOTTOM_LEFT, motorLeft);
+			setSpeed(BOTTOM_RIGHT, motorRight);
+		//}
+	    
+	    
+	    
+	
+		// SENDING DEBUGGING DATA TO GROUND
+		sendData(smoothedSWC, getPWMInputMinus1to1normalized(1), getPWMInputMinus1to1normalized(2), rot0, rot3, rot6, rot1, rot4, rot7, rot2, rot5, rot8, getHeight(), mpu_pos.accel_x, mpu_pos.accel_y, mpu_pos.accel_z, mpu_pos.gyro_x, mpu_pos.gyro_y, mpu_pos.gyro_z, motorLeft, servoRudder, servoElevator, getBatteryPercentage());
 	    
 	    /*
 	    if(counter == 10){
