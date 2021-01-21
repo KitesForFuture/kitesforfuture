@@ -41,7 +41,8 @@ float hover_height_control(){
 	//TODO: bound 3.5+(targetHeight - getHeight()) from below.
 	*/
 	
-	P_h = 0.3*P_h + 0.7*(3.5+(targetHeight - getHeight()));
+	P_h = 0.3*P_h + 0.7*(3.5+(targetHeight - getHeight())); // 0.7 ist hier zb einer dieser PID konstanten
+															// P_h = P Regeler für Höhe
 	
 	// in meters per second
 	// D_h, deviation from desired rate of climb
@@ -52,10 +53,11 @@ float hover_height_control(){
 	if(time_difference != 0){
 		tmp_variable = (lastHeight - getHeight())/time_difference;
 	}
-	float D_h = (tmp_variable+sign(goalHeight-getHeight())*adjustedClimbRate);
+	float D_h = (tmp_variable+sign(goalHeight-getHeight())*adjustedClimbRate); // D-Regler von PID
 	lastHeight = getHeight();
+	// Der D Regeler ist derjenige der die Aenderungsrate betrachtet
 	
-	float C_h = 0.7*(3*D_h + 10*P_h);
+	float C_h = 0.7*(3*D_h + 10*P_h); // C ist die Summe aus PID (hier gibt's kein I)
 	
 	// transition_factor is 1 when nose pointing to zenit, 0 when nose horizontal or lower
 	float transition_factor = angle_nose_horizon() * 0.64;

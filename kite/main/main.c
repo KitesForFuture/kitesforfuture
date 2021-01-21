@@ -53,15 +53,22 @@
 #include "motor_safety_bounds.c"
 #include "orientation_helpers.c"
 
-#include "control_glide_elevator.c"
+#include "control_glide_elevator.c"		// Glide, aktuell manuelle Steuerung
 #include "control_glide_rudder.c"
-#include "control_hover_elevator.c"
+#include "control_hover_elevator.c"		// Drohnenmodus / Aufstieg
 #include "control_hover_rudder.c"
 #include "control_hover_height.c"
-#include "PWM_input.c"
-#include "pid.c"
+#include "PWM_input.c"					// Wahrscheinlich Motoren
+#include "pid.c"						// Es geht darum aus dem Gyroskop die gewünschte Stellung von Höhen und Seitenrude anzupassen. Dafür gibts die Komponenten P, I, D.
 
 //int counter = 0;
+
+/*
+	Die aktuellen Steuerdaten gehen als struct übers WiFi
+
+	Geraten: Ist vermutlich so dass ein Thread die signale der fernbedienung in shared
+	memory speichert und die Wertebschaffung unten das dann liest
+*/
 
 void init(){
 	initUptime();
@@ -103,15 +110,21 @@ void app_main(void){
 	int landing = false;
 	
 	
-	
+	/*
+		Grundidee:
+		Wir lesen zyklisch alle Sensorwerte
+		Wenden PID an
+		Und applien korrektur auf Motoren & Servo
+	*/
 	while(1){
 		
-		update();
+		update(); // Wertebeschaffung
 		
 	    smoothedSWC = 0.9*smoothedSWC + 0.1*getPWMInput0to1normalized(0);
 	    
 		// set control gains from input signal
 		
+		// receivedSignal = vermutlich das Signal von der ESP Fernbedienung ???
 		LinksRechtsOffset = 140*((float)receivedSignal[0])/(3003.0); // [-70;70]
 		HochRunterOffset = 100*((float)receivedSignal[4])/(3003.0); // [-50;50]
 		
@@ -154,9 +167,13 @@ void app_main(void){
 			
 		}
 		
-		calculatePID();
+		calculatePID(); // Korrekturberechnung
 		
-		
+		/*
+			servoElevator, servoRudder, motorLeft, motorRight
+			werden in calculatePID gesetzt und dann ggf unten manuell überschrieben
+			(die Sache mit dem Durchschleifen der manuelle Steuerung)
+		*/
 	    
 	    // OVERWRITE CONTROLS BY MANUAL RC
 	    if(smoothedSWC < 0.25){
@@ -167,6 +184,8 @@ void app_main(void){
 	    	motorRight = getPWMInput0to1normalized(3)*90;
 		}
 		
+		// Asuführen der Korrektur
+
 		setAngle(TOP_RIGHT, servoElevator);
 		setAngle(TOP_LEFT, -servoRudder);
 		//if(getUptime() > 5){

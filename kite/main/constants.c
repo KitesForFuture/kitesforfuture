@@ -1,7 +1,7 @@
 // To calibrate BMP280 set CALIBRATION_MODE_BMP280 to 1, heat the sensor with e.g. a cup of tea (for about 90 seconds) and output MINUS_DP_BY_DT_reading preferably via wifi
 #define CALIBRATION_MODE_BMP280 0
 // kite 1: (0.000022), kite2: (0.000016), kiteJochen und raketenSchwanz (0.000024)
-#define MINUS_DP_BY_DT 0.000024
+#define MINUS_DP_BY_DT 0.000024 //  
 float MINUS_DP_BY_DT_reading = 0;
 
 // To calibrate set CALIBRATION_MODE_MPU6050 to 1, output acc_calibrationx,y,z preferably via wifi, set accel_offset_* to the midpoints between highest and lowest reading.

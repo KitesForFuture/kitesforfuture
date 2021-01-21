@@ -29,7 +29,24 @@ void calculatePID(){
 	if(C_h < 0) C_h = 0;
 	*/
 	
-	motorLeft = flightMode == HOVER_MODE ? hover_height_control() : 0;
+
+	/*
+		Hover Mode : 
+			Fuer jeden der 3 Komponenten
+			- Hoehe (Defakto Propellor)
+			- Lenkung A (Seitenruder - servoRudder)
+			- Lenung B (Höhenruder - servoElevator)
+			Jede der Konstanten transferiert einen Delta Wert (zB Höhenabweichung) in die notwendige Korrektur des jeweiligen zugehörigen Steuerelementes (zB Servo Elevator)
+			Die Konstanten sind durch Berechnung / Ausprobieren zustandegekommen
+			Jede der 3 Komponenten hat alle 3 Konstanten: P, I, D
+			Werte können auch im laufenden Betrieb über die Fernbedienung adjusted werden
+
+		Glide Mode :
+			?
+
+	*/
+
+	motorLeft = flightMode == HOVER_MODE ? hover_height_control() : 0; // Höhenruder
 	motorRight = motorLeft;
 	
 	//TODO: power mode, haha :D - Use with care!!!!!
@@ -43,7 +60,6 @@ void calculatePID(){
 	// MIXING PID FOR Z-AXIS AND X-AXIS
 	servoRudder = (flightMode == GLIDE_MODE || flightMode == MOTORPLANE_MODE) ? glide_rudder_control() : hover_rudder_control();
 	servoElevator = (flightMode == GLIDE_MODE || flightMode == MOTORPLANE_MODE) ? glide_elevator_control() : hover_elevator_control();
-	
-	
+
 	
 }
