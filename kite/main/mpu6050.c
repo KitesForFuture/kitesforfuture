@@ -249,7 +249,7 @@ void processMPURawData(){
 		acc_z /= mpu_pos.accel_norm;
 		
 		// rotate rotation matrix slightly in the direction where the expected and the currently measured acceleration vectors align.
-		rotate_towards_g(rot, mpu_pos_avg.accel_x, mpu_pos_avg.accel_y, mpu_pos_avg.accel_z, acc_x, acc_y, acc_z, tmp_vec, tmp_mat); // result is written to tmp_mat
+		rotate_towards_g(rot, mpu_pos_avg.accel_x, mpu_pos_avg.accel_y, mpu_pos_avg.accel_z, acc_x, acc_y, acc_z, tmp_mat); // result is written to tmp_mat
 		memcpy(tmp_mat, rot, sizeof(tmp_mat));
 		
 		// how rarely can we normalize without impacting the precision and drift?

@@ -104,8 +104,9 @@ void normalize_matrix(float a[]){
 // rotates matrix mat such that mat'*(a_init, b_init, c_init)' aligns more with (a,b,c)'
 // (a_init, b_init, c_init) can be initially measured acceleration vector, usually something close to (0,0,1)
 // (a,b,c) can be the currently measured acceleration vector
-void rotate_towards_g(float mat[], float a_init, float b_init, float c_init, float a, float b, float c, float tmp_vec[], float out[]){
+void rotate_towards_g(float mat[], float a_init, float b_init, float c_init, float a, float b, float c, float out[]){
 	// mat'*(a_init, b_init, c_init)'
+	float tmp_vec[3];
 	mat_transp_mult_vec(mat, a_init, b_init, c_init, tmp_vec);
 	
 	// determine the normalized rotation axis mat'*(a_init, b_init, c_init)' x (a,b,c)'
