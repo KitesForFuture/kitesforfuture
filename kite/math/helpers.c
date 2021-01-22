@@ -1,5 +1,4 @@
-#define true 1
-#define false 0
+#include <math.h>
 
 // acos function continuously extended beyond -1 and 1.
 float safe_acos(float number_more_or_less_between_one_and_minus_one){
@@ -15,14 +14,7 @@ int smallpow(int x, int p){
 	return ret;
 }
 
-float norm3(float a[3]){
-	return sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2]);
-}
-float norm3nonarray(float a, float b, float c){
-	return sqrt(a*a + b*b + c*c);
-}
-
-void crossProduct(float a, float b, float c, float x, float y, float z, float result[3]){
+void crossProduct(float a, float b, float c, float x, float y, float z, float result[]){
 	result[0] = b*z-c*y;
 	result[1] = c*x-a*z;
 	result[2] = a*y-b*x;
@@ -35,57 +27,45 @@ float sign(float x){
 		return 1;
 }
 
-float tmp_mat[9];
-
-void mat_mult(float a[9], float b[9]){
+void mat_mult(float a[], float b[], float out[]){
 	
 	for(int i = 0; i < 3; i++){
 		for(int j = 0; j < 3; j++){
-			tmp_mat[3*i+j] = 0;
 			for(int k = 0; k < 3; k++){
-				tmp_mat[3*i+j] += a[3*i+k]*b[3*k+j];
+				out[3*i+j] += a[3*i+k]*b[3*k+j];
 			}
 		}
 	}
 }
 
-void mat_mult_mat_transp(float a[9], float b[9]){
+void mat_mult_mat_transp(float a[], float b[], float out[]){
 	
 	for(int i = 0; i < 3; i++){
 		for(int j = 0; j < 3; j++){
-			tmp_mat[3*i+j] = 0;
 			for(int k = 0; k < 3; k++){
-				tmp_mat[3*i+j] += a[3*i+k]*b[3*j+k];
+				out[3*i+j] += a[3*i+k]*b[3*j+k];
 			}
 		}
 	}
 }
 
-float tmp_vec[3];
-void mat_transp_mult_vec(float mat[9], float a, float b, float c){
+void mat_transp_mult_vec(float mat[], float a, float b, float c, float out[]){
 	
 	for(int i = 0; i < 3; i++){
-			tmp_vec[i] = mat[i]*a + mat[i+3]*b + mat[i+6]*c;
+			out[i] = mat[i]*a + mat[i+3]*b + mat[i+6]*c;
 			
 	}
 }
 
-// currently not used
-void mat_mult_vec(float mat[9], float a, float b, float c){
+void mat_mult_vec(float mat[], float a, float b, float c, float out[]){
 	
 	for(int i = 0; i < 3; i++){
-			tmp_vec[i] = mat[i*3]*a + mat[i*3+1]*b + mat[i*3+2]*c;
+			out[i] = mat[i*3]*a + mat[i*3+1]*b + mat[i*3+2]*c;
 			
 	}
 }
 
-void array_copy(float a[9], float b[9]){
-	for(int i = 0; i < 9; i++){
-		a[i] = b[i];
-	}
-}
-
-void normalize_matrix(float a[9]){
+void normalize_matrix(float a[]){
 	
 	// Gram-Schmidt orthogonalization
 	// (direction of first column stays constant and always only the latter two are rotated)
@@ -124,8 +104,7 @@ void normalize_matrix(float a[9]){
 // rotates matrix mat such that mat'*(a_init, b_init, c_init)' aligns more with (a,b,c)'
 // (a_init, b_init, c_init) can be initially measured acceleration vector, usually something close to (0,0,1)
 // (a,b,c) can be the currently measured acceleration vector
-float tmp_rot_matrix[9];
-void rotate_towards_g(float mat[], float a_init, float b_init, float c_init, float a, float b, float c){
+void rotate_towards_g(float mat[], float a_init, float b_init, float c_init, float a, float b, float c, float tmp_vec[], float out[]){
 	// mat'*(a_init, b_init, c_init)'
 	mat_transp_mult_vec(mat, a_init, b_init, c_init);
 	
@@ -147,8 +126,10 @@ void rotate_towards_g(float mat[], float a_init, float b_init, float c_init, flo
 	// 0.004 works, error 0.01
 	// 0.04, error 0.07
 	// it appears that the gyro drifts a lot more when powered on battery instead of USB.
+	// ToDoLeo constants / knowledge inside calcualtion.
 	
 	// rotation matrix
+	float tmp_rot_matrix[9];
 	tmp_rot_matrix[0] = 1;
 	tmp_rot_matrix[1] = -axis_3*sin(angle);
 	tmp_rot_matrix[2] = axis_2*sin(angle);
@@ -159,20 +140,11 @@ void rotate_towards_g(float mat[], float a_init, float b_init, float c_init, flo
 	tmp_rot_matrix[7] = axis_1*sin(angle);
 	tmp_rot_matrix[8] = 1;
 	
-	mat_mult_mat_transp(mat, tmp_rot_matrix);
+	mat_mult_mat_transp(mat, tmp_rot_matrix, out);
 }
 
 
 // FUNCTIONS NECESSARY FOR REINFORCEMENT LEARNING
-
-// multiply column vector by row vector, result is a matrix
-void vectorMultiply(float a[], float b[], float destination[], int lengthA, int lengthB){
-	for(int i = 0; i < lengthA; i++){
-		for(int j = 0; j < lengthB; j++){
-			destination[i*lengthB + j] = a[i]*b[j];
-		}
-	}
-}
 
 // scalar product of two vectors
 float scalarProductOfMatrices(float A[], float B[], int length){
@@ -183,43 +155,21 @@ float scalarProductOfMatrices(float A[], float B[], int length){
 	return ret;
 }
 
-// multiply vector with a scalar, i.e. scale a vector
-void scalarMult(float alpha, float source[], float destination[], int length){
-	for(int i = 0; i < length; i++){
-		destination[i] = alpha*source[i];
-	}
-}
-
-void copyVector(float source[], float destination[], int length){
-	for(int i = 0; i < length; i++){
-		destination[i] = source[i];
-	}
-}
-
-float normalize(float source[], float destination[], int length){
-	float norm = sqrt(scalarProductOfMatrices(source, source, length));
+// ToDoLeo constants / knowledge inside calcualtion.
+/*
+ 		0.00001? Was fuer ein "normalize" ist das?
+		Warum hat es einen return wert UND einen Seiteneffekt?
+		(Vorher war es kein seiteneffekt sonder source->dest arrays. Allerdings wurde vorher dann auch unnoetigerweise ein copy_vector aufgerufen, denn keine der aufrufnden funktionen nutzt das duplizieren, die haben alle source=dest uebergeben.)
+		gehoert der control_hover call ggf semantisch zu den aufrufenden stellen? und sollte mit uebergeben werden?
+*/
+float normalize(float a[], int length) {
+	float norm = sqrt(scalarProductOfMatrices(a, a, length));
 	if(norm > 0.00001){
-		scalarMult(1.0/norm, source, destination, length);
-	}else{
-		copyVector(source, destination, length);
+		for(int i = 0; i < length; i++){
+			a[i] = (1.0/norm)*a[i];
+		}
 	}
 	
 	return norm;
 }
 
-void addMatrices(float A[], float B[], float destination[], int length){
-	for(int i = 0; i < length; i++){
-		destination[i] = A[i]+B[i];
-	}
-}
-
-void subtractMatrices(float A[], float B[], float destination[], int length){
-	for(int i = 0; i < length; i++){
-		destination[i] = A[i]-B[i];
-	}
-}
-
-//returns random number between 0 and 1
-float myrandom(){
-	return ((float)rand())/((float)RAND_MAX);
-}

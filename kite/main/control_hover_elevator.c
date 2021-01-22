@@ -1,3 +1,5 @@
+#include "./../math/helpers.h"
+
 void setYAxisTrim(float trim){
 	y_axis_trim = trim;
 }
@@ -12,7 +14,7 @@ float hover_elevator_control(){
 	
 	// when props point sideways y-axis may be controlled by wind direction (... or better "controlled" through aerodynamic "longitudinal static stability" + remaining D_y term)
 	// this factor ensures that when the props point sideways, it doesn't control
-	float factor = normalize(a, a, 3);
+	float factor = normalize(a, 3);
 	float z[3];
 	z[0] = rot2;
 	z[1] = rot5;

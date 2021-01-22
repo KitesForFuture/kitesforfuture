@@ -17,8 +17,12 @@
 #include "driver/gpio.h"
 #include "driver/i2c.h"
 
+// ToDoLeo Up here for now cause other .c includes use it.
+#define true 1
+#define false 0
+
 // some helper functions for mathematical operations
-#include "mymath.c"
+#include "./../math/helpers.h"
 
 #include "timer.c"
 #include "constants.c"
