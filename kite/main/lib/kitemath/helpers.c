@@ -106,7 +106,7 @@ void normalize_matrix(float a[]){
 // (a,b,c) can be the currently measured acceleration vector
 void rotate_towards_g(float mat[], float a_init, float b_init, float c_init, float a, float b, float c, float tmp_vec[], float out[]){
 	// mat'*(a_init, b_init, c_init)'
-	mat_transp_mult_vec(mat, a_init, b_init, c_init);
+	mat_transp_mult_vec(mat, a_init, b_init, c_init, tmp_vec);
 	
 	// determine the normalized rotation axis mat'*(a_init, b_init, c_init)' x (a,b,c)'
 	float axis_1 = tmp_vec[1]*c-tmp_vec[2]*b;
