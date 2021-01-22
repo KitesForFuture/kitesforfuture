@@ -1,4 +1,4 @@
-idf_component_register(SRCS "mpu6050.c" "main.c"
+idf_component_register(SRCS "main.c"
                     INCLUDE_DIRS ".")
 
 # Build static library, do not build test executables
