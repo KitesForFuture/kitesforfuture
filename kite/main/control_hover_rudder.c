@@ -1,4 +1,4 @@
-#include "./../math/helpers.h"
+#include "lib/kitemath/helpers.h"
 
 // PID CONTROLLER FOR KEEPING THE Y-AXIS LEVEL (Z-AXIS CONTROLLER)
 float P_z = 0;
