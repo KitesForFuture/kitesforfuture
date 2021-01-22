@@ -1,4 +1,4 @@
-#include "lib/kitemath/helpers.h"
+#include "kitemath/helpers.h"
 
 void setYAxisTrim(float trim){
 	y_axis_trim = trim;

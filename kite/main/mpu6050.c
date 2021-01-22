@@ -1,7 +1,7 @@
 // HOW TO CALIBRATE:
 // output acc_calibrationx,y,z preferably via wifi, set accel_offset_* in constants.c to the midpoints between highest and lowest reading.
 
-#include "lib/kitemath/helpers.h"
+#include "kitemath/helpers.h"
 #include <string.h>
 
 struct position_data{

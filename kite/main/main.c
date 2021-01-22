@@ -22,7 +22,7 @@
 #define false 0
 
 // some helper functions for mathematical operations
-#include "lib/kitemath/helpers.h"
+#include "kitemath/helpers.h"
 
 #include "timer.c"
 #include "constants.c"
