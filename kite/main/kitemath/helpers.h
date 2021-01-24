@@ -1,6 +1,6 @@
 
-#ifndef KITE_MATH_HELPERS
-#define KITE_MATH_HELPERS
+#ifndef KITEMATH_HELPERS
+#define KITEMATH_HELPERS
  
 float safe_acos(float number_more_or_less_between_one_and_minus_one);
 
@@ -25,5 +25,5 @@ void rotate_towards_g(float mat[], float a_init, float b_init, float c_init, flo
 float scalarProductOfMatrices(float A[], float B[], int length);
 
 float normalize(float a[], int length);
- 
+
 #endif

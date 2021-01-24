@@ -156,13 +156,6 @@ float scalarProductOfMatrices(float A[], float B[], int length){
 	return ret;
 }
 
-// ToDoLeo constants / knowledge inside calcualtion.
-/*
- 		0.00001? Was fuer ein "normalize" ist das?
-		Warum hat es einen return wert UND einen Seiteneffekt?
-		(Vorher war es kein seiteneffekt sonder source->dest arrays. Allerdings wurde vorher dann auch unnoetigerweise ein copy_vector aufgerufen, denn keine der aufrufnden funktionen nutzt das duplizieren, die haben alle source=dest uebergeben.)
-		gehoert der control_hover call ggf semantisch zu den aufrufenden stellen? und sollte mit uebergeben werden?
-*/
 float normalize(float a[], int length) {
 	float norm = sqrt(scalarProductOfMatrices(a, a, length));
 	if(norm > 0.00001){
