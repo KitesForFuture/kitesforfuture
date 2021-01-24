@@ -1,3 +1,5 @@
+#include "kitemath/helpers.h"
+
 // PID CONTROLLER FOR KEEPING THE Y-AXIS LEVEL (Z-AXIS CONTROLLER)
 float P_z = 0;
 float D_z = 0;
@@ -12,7 +14,7 @@ float hover_rudder_control(){
 	crossProduct(rot2, rot5, rot8, 1, 0, 0, a);
 	
 	// this factor ensures that when it is horizontal like a plane, i.e. when the neutral position is undefined, it doesn't control
-	float factor = normalize(a, a, 3);
+	float factor = normalize(a, 3);
 	float y[3];
 	y[0] = rot1;
 	y[1] = rot4;

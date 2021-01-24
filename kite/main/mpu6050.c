@@ -1,6 +1,9 @@
 // HOW TO CALIBRATE:
 // output acc_calibrationx,y,z preferably via wifi, set accel_offset_* in constants.c to the midpoints between highest and lowest reading.
 
+#include "kitemath/helpers.h"
+#include <string.h>
+
 struct position_data{
 	float accel_norm;
 	
@@ -139,8 +142,9 @@ void rotateAroundXAxis(float radians){
 	diff[7] = sin(radians);
 	diff[8] = cos(radians);
 	
-	mat_mult(rot, diff);		// writes result to global variable tmp_mat
-	array_copy(rot, tmp_mat);
+	float tmp_mat[9];
+	mat_mult(rot, diff, tmp_mat);
+	memcpy(tmp_mat, rot, sizeof(tmp_mat));
 }
 
 void processMPURawData(){
@@ -175,17 +179,19 @@ void processMPURawData(){
 		diff[7] = sin(alpha);
 		diff[8] = cos(alpha)*cos(beta);
 		
-		mat_mult(rot, diff);		// writes result to global variable tmp_mat
-		array_copy(rot, tmp_mat);
+		float tmp_mat[9];
+		mat_mult(rot, diff, tmp_mat);
+		memcpy(tmp_mat, rot, sizeof(tmp_mat));
 		
 		// normalized current acceleration vector
 		float acc_x = mpu_pos.accel_x-accel_offset_x;// zero offset to compensate for constant accelerometer inaccuracies.
 		float acc_y = mpu_pos.accel_y-accel_offset_y;// to be found in constants.c
 		float acc_z = mpu_pos.accel_z-accel_offset_z;
 		
-		
+		float tmp_vec[3];
+
 		// rotate acc_*_smooth
-		mat_transp_mult_vec(diff, acc_x_smooth, acc_y_smooth, acc_z_smooth);
+		mat_transp_mult_vec(diff, acc_x_smooth, acc_y_smooth, acc_z_smooth, tmp_vec);
 		acc_x_smooth = tmp_vec[0];
 		acc_y_smooth = tmp_vec[1];
 		acc_z_smooth = tmp_vec[2];
@@ -197,7 +203,7 @@ void processMPURawData(){
 		
 		
 		// rotate acc_*_very_smooth
-		mat_transp_mult_vec(diff, acc_x_very_smooth, acc_y_very_smooth, acc_z_very_smooth);
+		mat_transp_mult_vec(diff, acc_x_very_smooth, acc_y_very_smooth, acc_z_very_smooth, tmp_vec);
 		acc_x_very_smooth = tmp_vec[0];
 		acc_y_very_smooth = tmp_vec[1];
 		acc_z_very_smooth = tmp_vec[2];
@@ -212,7 +218,7 @@ void processMPURawData(){
 		acc_without_g_y = acc_y - acc_y_very_smooth;
 		acc_without_g_z = acc_z - acc_z_very_smooth;
 		// ACCELERATION MINUS GRAVITY from KITE to WORLD COORDINATES
-		mat_mult_vec(rot, acc_without_g_x, acc_without_g_y, acc_without_g_z);
+		mat_mult_vec(rot, acc_without_g_x, acc_without_g_y, acc_without_g_z, tmp_vec);
 		acc_height = tmp_vec[0];
 		/*
 		// VELOCITY from ACCELERATION
@@ -243,8 +249,8 @@ void processMPURawData(){
 		acc_z /= mpu_pos.accel_norm;
 		
 		// rotate rotation matrix slightly in the direction where the expected and the currently measured acceleration vectors align.
-		rotate_towards_g(rot, mpu_pos_avg.accel_x, mpu_pos_avg.accel_y, mpu_pos_avg.accel_z, acc_x, acc_y, acc_z); // result is written to tmp_mat
-		array_copy(rot, tmp_mat);
+		rotate_towards_g(rot, mpu_pos_avg.accel_x, mpu_pos_avg.accel_y, mpu_pos_avg.accel_z, acc_x, acc_y, acc_z, tmp_mat); // result is written to tmp_mat
+		memcpy(tmp_mat, rot, sizeof(tmp_mat));
 		
 		// how rarely can we normalize without impacting the precision and drift?
 		//timeForNormalization ++;
