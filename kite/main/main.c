@@ -67,6 +67,13 @@
 
 //int counter = 0;
 
+float time_difference; // ToDoLeo: This should be local in update as soon as we have everything refactored to get it passed in.
+int64_t lastUpdateTime;
+int64_t currentTime;
+
+// rotation of the drone in world coordinates
+float rot[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+
 void init(){
 	initUptime();
 	initSensors();
@@ -87,8 +94,14 @@ void init(){
 }
 
 void update(){
-	readMPURawData();
-	processMPURawData();
+
+	// int64_t esp_timer_get_time() returns time since boot in us (microseconds = 10^-6 seconds)	
+	lastUpdateTime = currentTime;
+	currentTime = esp_timer_get_time();
+	time_difference = 0.000001*(float)(currentTime - lastMPUtime);
+
+	//readMPURawData();
+	processMPURawData(time_difference, rot);
 	fuseHeightSensorData();
 	updateBatteryPercentage();
 	updateWindDirection();
@@ -106,8 +119,9 @@ void app_main(void){
 	
 	int landing = false;
 	
-	
-	
+	// Do this immediately before the first update.
+	currentTime = esp_timer_get_time();
+	vTaskDelay(1.0);
 	while(1){
 		
 		update();
@@ -184,22 +198,7 @@ void app_main(void){
 		// SENDING DEBUGGING DATA TO GROUND
 		sendData(smoothedSWC, getPWMInputMinus1to1normalized(1), getPWMInputMinus1to1normalized(2), rot0, rot3, rot6, rot1, rot4, rot7, rot2, rot5, rot8, getHeight(), mpu_pos.accel_x, mpu_pos.accel_y, mpu_pos.accel_z, mpu_pos.gyro_x, mpu_pos.gyro_y, mpu_pos.gyro_z, motorLeft, servoRudder, servoElevator, getBatteryPercentage());
 	    
-	    /*
-	    if(counter == 10){
-	    	//printf("angle = %f.\n", angle);
-	    	
-			printf("accel_x = %f, %f.\n", mpu_pos_avg.accel_x, mpu_pos.accel_x);
-			printf("accel_y = %f, %f.\n", mpu_pos_avg.accel_y, mpu_pos.accel_y);
-			printf("accel_z = %f, %f.\n", mpu_pos_avg.accel_z, mpu_pos.accel_z);
-			printf("gyro_x = %f.\n", mpu_pos.gyro_x-mpu_pos_avg.gyro_x);
-			printf("gyro_y = %f.\n", mpu_pos.gyro_y-mpu_pos_avg.gyro_y);
-			printf("gyro_z = %f.\n", mpu_pos.gyro_z-mpu_pos_avg.gyro_z);
-			printf("rot= %f\t%f\t%f\t\n     %f\t%f\t%f\t\n     %f\t%f\t%f\t", rot[0], rot[1], rot[2], rot[3], rot[4], rot[5], rot[6], rot[7], rot[8]);
-			
-			printf("free memory = %d.\n", xPortGetFreeHeapSize());
-	    	counter = 0;
-	    }counter++;
-	    */
+
 	    vTaskDelay(1.0);
 	    
     }
