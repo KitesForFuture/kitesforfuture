@@ -1,10 +1,12 @@
 on: push
 
+defaults:
+  run:
+    working-directory: kite
+
 jobs:
   build:
     runs-on: self-hosted
-    defaults:
-      working-directory: kite
     steps:
       - name: idf build
         run: idf.py build
