@@ -4,7 +4,6 @@ jobs:
   build:
     runs-on: self-hosted
     defaults:
-      shell: bash
       working-directory: kite
     steps:
       - name: idf build
