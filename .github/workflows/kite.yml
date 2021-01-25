@@ -1,0 +1,11 @@
+on: push
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+      - name: idf build
+        run: |
+          cd kite
+          idf.py fullclean build
