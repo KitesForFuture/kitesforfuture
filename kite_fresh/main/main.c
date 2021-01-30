@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "driver/gpio.h"
 #include "sdkconfig.h"
-    
-#include "i2c_devices/interchip.c"
-#include "i2c_devices/cat24c256.c"
-#include "i2c_devices/bmp280.c"
-#include "i2c_devices/mpu6050.c"
+
+#include "i2c_devices/cat24c256.h"
+#include "i2c_devices/bmp280.h"
+#include "i2c_devices/mpu6050.h"
 
 struct i2c_bus bus0 = {14, 25};
 struct i2c_bus bus1 = {18, 19};

@@ -1,11 +1,12 @@
 #include "freertos/FreeRTOS.h"
-#include "driver/i2c.h"
+#include "freertos/task.h"
 #include "../helpers/timer.h"
+#include "bmp280.h"
 
-int64_t UPDATE_INTERVAL_MICROSECONDS = 50000;
-float SMOOTHING_TEMPERATURE_RECENT_VALUE_WEIGHT = 0.2;
-float SMOOTHING_PRESSURE_RECENT_VALUE_WEIGHT = 0.2;
-int INITIAL_MEASUREMENT_CYCLE_COUNT = 5;
+#define  UPDATE_INTERVAL_MICROSECONDS 50000
+#define  SMOOTHING_TEMPERATURE_RECENT_VALUE_WEIGHT 0.2
+#define  SMOOTHING_PRESSURE_RECENT_VALUE_WEIGHT 0.2
+#define  INITIAL_MEASUREMENT_CYCLE_COUNT 5
 
 struct i2c_bus bus;
 Time last_update;
@@ -24,7 +25,7 @@ float current_smoothened_pressure = 0;
 int64_t last_update = 0;
 
 uint32_t getTemperature(){
-	uint8_t highByte = i2c_receive(bus, 0x76, 0xF7, 1);
+	uint8_t highByte = i2c_receive(bus, 0x76, 0xF7, 1); // ToDoLeo: interchip should expose a read-x byte sequence function
 	uint8_t middleByte = i2c_receive(bus, 0x76, 0xF8, 1);
 	uint8_t lowByte = i2c_receive(bus, 0x76, 0xF9, 1);
 	return (uint32_t)((highByte << 16) | (middleByte << 8) | lowByte);

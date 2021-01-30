@@ -1,11 +1,7 @@
 
 #include "freertos/FreeRTOS.h"
 #include "../helpers/math.h"
-
-struct position_data {
-	float accel[3];
-  float gyro[3];
-};
+#include "mpu6050.h"
 
 
 // HOW TO CALIBRATE:
@@ -14,8 +10,8 @@ struct position_data {
 struct position_data mpu_pos_callibration;
 struct i2c_bus bus;
 
-float gyro_precision_factor = 0;	//factor needed to get to deg/sec
-float accel_precision_factor = 0;	//factor needed to get to m/s
+float gyro_precision_factor;	//factor needed to get to deg/sec
+float accel_precision_factor;	//factor needed to get to m/s
 
 //sens = 0 <-> +- 250 deg/sec
 //sens = 1 <-> +- 500 deg/sec

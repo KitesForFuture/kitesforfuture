@@ -1,11 +1,13 @@
 #include "freertos/FreeRTOS.h"
+#include "interchip.h"
 #include "driver/i2c.h"
+#include "cat24c256.h"
 
-//#include "interchip.c"
+#define I2C_PORT_T 0
 
 struct i2c_bus bus;
 
-static float i2c_receive_16bitDataAddress(int chip_addr, int data_addr)
+float i2c_receive_16bitDataAddress(int chip_addr, int data_addr)
 {
 	esp_err_t ret = ESP_FAIL;
 	int no_of_try = 0;
@@ -32,9 +34,9 @@ static float i2c_receive_16bitDataAddress(int chip_addr, int data_addr)
 		i2c_master_read_byte(cmd, data + 3, NACK_VAL);
 		
 		i2c_master_stop(cmd); // STOP
-		ret = i2c_master_cmd_begin(i2c_port, cmd, 1000 / portTICK_RATE_MS);
+		ret = i2c_master_cmd_begin(I2C_PORT_T, cmd, 1000 / portTICK_RATE_MS);
 		i2c_cmd_link_delete(cmd);
-		i2c_driver_delete(i2c_port);
+		i2c_driver_delete(I2C_PORT_T);
 		no_of_try++;
 		//printf("tried, ret = %d\n", ret);
 	}while(ret != ESP_OK && no_of_try < 10);
@@ -54,7 +56,7 @@ static float i2c_receive_16bitDataAddress(int chip_addr, int data_addr)
 
 
 
-static int i2c_send_16bitDataAddress(int chip_addr, int data_addr, float data, int len)
+int i2c_send_16bitDataAddress(int chip_addr, int data_addr, float data, int len)
 {
 	union Conversion {
 		int i;
@@ -75,7 +77,7 @@ static int i2c_send_16bitDataAddress(int chip_addr, int data_addr, float data, i
     // above loop could be replaced by something like
     // i2c_master_write(cmd, &(conversion.i), ACK_CHECK_EN);
     i2c_master_stop(cmd); // STOP
-    esp_err_t ret = i2c_master_cmd_begin(i2c_port, cmd, 1000 / portTICK_RATE_MS);
+    esp_err_t ret = i2c_master_cmd_begin(I2C_PORT_T, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
     if (ret == ESP_OK) {
         //printf("i2c: Write OK");
@@ -84,7 +86,7 @@ static int i2c_send_16bitDataAddress(int chip_addr, int data_addr, float data, i
     } else {
         printf("i2c: Write Failed");
     }
-    i2c_driver_delete(i2c_port);
+    i2c_driver_delete(I2C_PORT_T);
     return 0;
 }
 

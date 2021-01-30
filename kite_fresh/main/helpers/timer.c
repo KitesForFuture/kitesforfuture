@@ -1,5 +1,4 @@
-#include "freertos/FreeRTOS.h"
-#define Time int64_t
+#include "timer.h"
 
 Time start_timer(){
 	return esp_timer_get_time();
