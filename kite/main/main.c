@@ -74,6 +74,7 @@ int64_t currentTime;
 // rotation of the drone in world coordinates
 float rot[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
 
+
 void init(){
 	initUptime();
 	initSensors();
@@ -86,7 +87,7 @@ void init(){
 	setSpeed(BOTTOM_RIGHT, 0);
 	setAngle(TOP_LEFT, 0);
 	
-	initMPU6050();
+	initMPU6050(readEEPROM(0), readEEPROM(1), readEEPROM(2), readEEPROM(3), readEEPROM(4), readEEPROM(5), readEEPROM(6));
 	initHeightSensorFusion();
 	setNumberOfOmittedSends(0); // debugging info sent to pc every x iterations
 	

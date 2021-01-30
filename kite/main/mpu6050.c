@@ -86,15 +86,6 @@ void readMPURawData(){
 
 }
 
-// ToDo read calibration
-calibration_pos.accel_x = readEEPROM(0);
-calibration_pos.accel_y = readEEPROM(1);
-calibration_pos.accel_z = readEEPROM(2);
-calibration_pos.gyro_x = readEEPROM(3);
-calibration_pos.gyro_y = readEEPROM(4);
-calibration_pos.gyro_z = readEEPROM(5);
-MINUS_DP_BY_DT = readEEPROM(6);
-
 void processMPURawData(float time_difference, rot){
 		
 	// matrix based:
@@ -127,46 +118,13 @@ void processMPURawData(float time_difference, rot){
 	float acc_y = mpu_pos.accel_y-accel_offset_y;// to be found in constants.c
 	float acc_z = mpu_pos.accel_z-accel_offset_z;
 	
-	float tmp_vec[3];
-
-	// rotate acc_*_smooth
-	mat_transp_mult_vec(diff, acc_x_smooth, acc_y_smooth, acc_z_smooth, tmp_vec);
-	acc_x_smooth = tmp_vec[0];
-	acc_y_smooth = tmp_vec[1];
-	acc_z_smooth = tmp_vec[2];
-	
-	acc_x_smooth = 0.8* acc_x_smooth + 0.2*acc_x;
-	acc_y_smooth = 0.8* acc_y_smooth + 0.2*acc_y;
-	acc_z_smooth = 0.8* acc_z_smooth + 0.2*acc_z;
-	accel_norm_smooth = sqrt((acc_x_smooth*acc_x_smooth)+(acc_y_smooth*acc_y_smooth)+(acc_z_smooth*acc_z_smooth));
-	
-	
-	// rotate acc_*_very_smooth
-	mat_transp_mult_vec(diff, acc_x_very_smooth, acc_y_very_smooth, acc_z_very_smooth, tmp_vec);
-	acc_x_very_smooth = tmp_vec[0];
-	acc_y_very_smooth = tmp_vec[1];
-	acc_z_very_smooth = tmp_vec[2];
-	
-	acc_x_very_smooth = 0.999* acc_x_very_smooth + 0.001*acc_x;
-	acc_y_very_smooth = 0.999* acc_y_very_smooth + 0.001*acc_y;
-	acc_z_very_smooth = 0.999* acc_z_very_smooth + 0.001*acc_z;
-	//accel_norm_very_smooth = sqrt((acc_x_very_smooth*acc_x_very_smooth)+(acc_y_very_smooth*acc_y_very_smooth)+(acc_z_very_smooth*acc_z_very_smooth));
-	
-	// ACCELERATION MINUS GRAVITY in KITE COORDINATES
-	acc_without_g_x = acc_x - acc_x_very_smooth;
-	acc_without_g_y = acc_y - acc_y_very_smooth;
-	acc_without_g_z = acc_z - acc_z_very_smooth;
-	// ACCELERATION MINUS GRAVITY from KITE to WORLD COORDINATES
-	mat_mult_vec(rot, acc_without_g_x, acc_without_g_y, acc_without_g_z, tmp_vec);
-	acc_height = tmp_vec[0];
-	
 	mpu_pos.accel_norm = sqrt((acc_x*acc_x)+(acc_y*acc_y)+(acc_z*acc_z));       //Calculate the total accelerometer vector.
 	acc_x /= mpu_pos.accel_norm;
 	acc_y /= mpu_pos.accel_norm;
 	acc_z /= mpu_pos.accel_norm;
 	
 	// rotate rotation matrix slightly in the direction where the expected and the currently measured acceleration vectors align.
-	rotate_towards_g(new_rot, mpu_pos_avg.accel_x, mpu_pos_avg.accel_y, mpu_pos_avg.accel_z, acc_x, acc_y, acc_z, rot); // result is written to tmp_mat
+	rotate_towards_g(new_rot, mpu_pos_avg.accel_x, mpu_pos_avg.accel_y, mpu_pos_avg.accel_z, acc_x, acc_y, acc_z, rot); // result is written to rot
 	
 	// how rarely can we normalize without impacting the precision and drift?
 	//timeForNormalization ++;
@@ -176,9 +134,17 @@ void processMPURawData(float time_difference, rot){
 	//}
 }
 
-void initMPU6050(){
+void initMPU6050(float accel_x, float accel_y, float accel_z, float gyro_x, float gyro_y, float gyro_z){
+	
 	//wake up MPU6050 from sleep mode
 	i2c_send(0, 104, 107, 0, 1);
+
+	mpu_pos_callibration.accel_x = accel_x;
+	mpu_pos_callibration.accel_y = accel_y;
+	mpu_pos_callibration.accel_z = accel_z;
+	mpu_pos_callibration.gyro_x = gyro_x;
+	mpu_pos_callibration.gyro_y = gyro_y;
+	mpu_pos_callibration.gyro_z = gyro_z;
 	
 	init_gyro_sensitivity(1);
 	init_accel_sensitivity(2);
