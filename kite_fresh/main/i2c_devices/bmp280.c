@@ -65,7 +65,6 @@ void init_bmp28(struct i2c_bus bus_arg, float dp_by_dt){ // ToDoLeo rename to in
   }
   initial_smoothened_temperature = current_smoothened_temperature;
   initial_smoothened_pressure = current_smoothened_pressure;
-  
 }
 
 float getPressureDiff(){

@@ -28,7 +28,10 @@ void app_main(void)
     printf("%f\n", test);
 
     while(1) {
-        vTaskDelay(5);
-        printf(".");
+        vTaskDelay(10);
+        update_bmp280_if_necessary();
+        printf("BMP280 Pressure Diff: ");
+        test = getPressureDiff();
+        printf("%f\n", test);
     }
 }
