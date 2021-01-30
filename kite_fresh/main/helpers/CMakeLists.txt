@@ -1,2 +1,3 @@
 add_library(helpers
- timer.c)
+ timer.c
+ math.c)

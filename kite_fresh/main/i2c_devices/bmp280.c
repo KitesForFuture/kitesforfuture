@@ -61,6 +61,7 @@ void init_bmp28(struct i2c_bus bus_arg, float dp_by_dt){ // ToDoLeo rename to in
   startBmp280Measurement();
   int update_count = 0;
   while (update_count < INITIAL_MEASUREMENT_CYCLE_COUNT) {
+    vTaskDelay(5);
     update_count = update_count + update_bmp280_if_necessary();
   }
   initial_smoothened_temperature = current_smoothened_temperature;
@@ -71,4 +72,8 @@ float getPressureDiff(){
   float delta_temperature = current_smoothened_temperature - initial_smoothened_temperature;
   float delta_pressure = current_smoothened_pressure - initial_smoothened_pressure;
   return delta_pressure + delta_temperature * dp_by_dt_factor;
+}
+
+float getHeight() {
+  return -10 * getPressureDiff();
 }
