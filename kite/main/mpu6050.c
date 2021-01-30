@@ -1,4 +1,4 @@
-// HOW TO CALIBRATE:
+// HOW TO CALIBRATE: 
 // output acc_calibrationx,y,z preferably via wifi, set accel_offset_* in constants.c to the midpoints between highest and lowest reading.
 
 #include "kitemath/helpers.h"
