@@ -33,6 +33,8 @@
 #include "motors.c"
 // i2c protocol for communication with mpu6050 and bmp280
 #include "interchip.c"
+// persistent memory chip
+#include "cat24c256.c"
 // gyroscope and accelerometer
 #include "mpu6050.c"
 // barometer
