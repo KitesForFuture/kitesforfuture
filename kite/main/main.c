@@ -89,7 +89,7 @@ void init(){
 	setSpeed(BOTTOM_RIGHT, 0);
 	setAngle(TOP_LEFT, 0);
 	
-	initMPU6050(readEEPROM(0), readEEPROM(1), readEEPROM(2), readEEPROM(3), readEEPROM(4), readEEPROM(5), readEEPROM(6));
+	initMPU6050(readEEPROM(0), readEEPROM(1), readEEPROM(2), readEEPROM(3), readEEPROM(4), readEEPROM(5));
 	initHeightSensorFusion();
 	setNumberOfOmittedSends(0); // debugging info sent to pc every x iterations
 	
@@ -101,9 +101,9 @@ void update(){
 	// int64_t esp_timer_get_time() returns time since boot in us (microseconds = 10^-6 seconds)	
 	lastUpdateTime = currentTime;
 	currentTime = esp_timer_get_time();
-	time_difference = 0.000001*(float)(currentTime - lastMPUtime);
+	time_difference = 0.000001*(float)(currentTime - lastUpdateTime);
 
-	//readMPURawData();
+	readMPURawData();
 	processMPURawData(time_difference, rot);
 	fuseHeightSensorData();
 	updateBatteryPercentage();

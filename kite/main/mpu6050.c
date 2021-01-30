@@ -86,7 +86,7 @@ void readMPURawData(){
 
 }
 
-void processMPURawData(float time_difference, rot){
+void processMPURawData(float time_difference, float[] rot) {
 		
 	// matrix based:
 	// rotation-matrix:
