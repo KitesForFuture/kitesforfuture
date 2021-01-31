@@ -3,10 +3,12 @@ on: [push, pull_request]
 jobs:
   kite-legacy-build:
     runs-on: ubuntu-latest
+    defaults:
+      uses:
+        working-directory: kite
     steps:
       - uses: actions/checkout@v2
       - name: esp-idf build
-        working-directory: kite
         uses: KitesForFuture/esp-idf-ci-action@1
   kite-new-build:
     runs-on: ubuntu-latest
@@ -16,5 +18,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: esp-idf build
-        working-directory: kite-fresh
         uses: KitesForFuture/esp-idf-ci-action@1
