@@ -7,7 +7,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: esp-idf build
         working-directory: kite
-        uses: sebastianPsm/esp-idf-ci-action@1
+        uses: KitesForFuture/esp-idf-ci-action@1
   kite-new-build:
     runs-on: ubuntu-latest
     defaults:
@@ -17,4 +17,4 @@ jobs:
       - uses: actions/checkout@v2
       - name: esp-idf build
         working-directory: kite-fresh
-        uses: sebastianPsm/esp-idf-ci-action@1
+        uses: KitesForFuture/esp-idf-ci-action@1
