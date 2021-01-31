@@ -1,11 +1,21 @@
 on: push
 
 jobs:
-  build:
+  kite-legacy-build:
     runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: kite
     steps:
       - uses: actions/checkout@v2
-      - name: idf build
-        run: |
-          cd kite
-          idf.py fullclean build
+      - name: esp-idf build
+        uses: sebastianPsm/esp-idf-ci-action@1
+  kite-new-build:
+    runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: kite-fresh
+    steps:
+      - uses: actions/checkout@v2
+      - name: esp-idf build
+        uses: sebastianPsm/esp-idf-ci-action@1
