@@ -4,7 +4,7 @@ jobs:
   kite-legacy-build:
     runs-on: ubuntu-latest
     defaults:
-      uses:
+      run:
         working-directory: kite
     steps:
       - uses: actions/checkout@v2
