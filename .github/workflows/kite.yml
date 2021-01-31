@@ -2,7 +2,7 @@ on: [push, pull_request]
 
 jobs:
   kite-legacy-build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: kite
@@ -11,7 +11,7 @@ jobs:
       - name: esp-idf build
         uses: sebastianPsm/esp-idf-ci-action@1
   kite-new-build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: kite-fresh
